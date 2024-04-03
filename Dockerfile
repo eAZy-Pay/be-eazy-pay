@@ -1,5 +1,5 @@
 # 빌드 스테이지
-FROM eclipse-temurin:11-jdk-alpine as builder
+FROM eclipse-temurin:17-jdk-alpine as builder
 
 WORKDIR /usr/src/app
 
@@ -14,7 +14,7 @@ COPY src src
 RUN ./gradlew build
 
 # App 실행 이미지
-FROM eclipse-temurin:11-jre-alpine
+FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
