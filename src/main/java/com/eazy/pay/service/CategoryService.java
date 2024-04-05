@@ -1,6 +1,7 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.model.Category;
+import com.eazy.pay.dao.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

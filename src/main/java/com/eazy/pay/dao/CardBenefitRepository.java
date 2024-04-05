@@ -1,4 +1,4 @@
-package com.eazy.pay.service;
+package com.eazy.pay.dao;
 
 import com.eazy.pay.model.CardBenefit;
 import org.springframework.data.jpa.repository.JpaRepository;

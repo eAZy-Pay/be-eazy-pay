@@ -1,6 +1,7 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.model.PayBenefit;
+import com.eazy.pay.dao.PayBenefitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

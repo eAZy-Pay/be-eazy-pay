@@ -1,5 +1,6 @@
 package com.eazy.pay.service;
 import com.eazy.pay.model.Card;
+import com.eazy.pay.dao.CardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

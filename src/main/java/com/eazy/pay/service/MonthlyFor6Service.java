@@ -1,6 +1,7 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.model.MonthlyFor6;
+import com.eazy.pay.dao.MonthlyFor6Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
