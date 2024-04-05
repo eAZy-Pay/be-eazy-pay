@@ -2,6 +2,7 @@ package com.eazy.pay.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -9,10 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CardBenefit {
-
-    @Id
-    private int uid;
+@EqualsAndHashCode(callSuper = true)
+public class CardBenefit extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "card_id", referencedColumnName = "uid")

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MonthlyFor6Repository extends JpaRepository<MonthlyFor6, Integer> {
+public interface MonthlyFor6Repository extends JpaRepository<MonthlyFor6, Long> {
     List<MonthlyFor6> findAll();
+
+//    List<MonthlyFor6> findAllByUserId(Long userId);
 }

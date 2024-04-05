@@ -2,6 +2,7 @@ package com.eazy.pay.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
@@ -11,11 +12,8 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PayBenefit {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int uid;
+@EqualsAndHashCode(callSuper = true)
+public class PayBenefit extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "card_num", referencedColumnName = "num")

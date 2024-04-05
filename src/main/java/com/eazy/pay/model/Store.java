@@ -2,17 +2,15 @@ package com.eazy.pay.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "stores")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Store {
-
-    @Id
-    @Column(name = "store_code")
-    private String store_code;
+@EqualsAndHashCode(callSuper = true)
+public class Store extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "uid")

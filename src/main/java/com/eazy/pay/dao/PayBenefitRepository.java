@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PayBenefitRepository extends JpaRepository<PayBenefit, Integer> {
+public interface PayBenefitRepository extends JpaRepository<PayBenefit, Long> {
     List<PayBenefit> findAll();
 }

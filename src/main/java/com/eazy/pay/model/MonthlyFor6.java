@@ -2,6 +2,7 @@ package com.eazy.pay.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -9,11 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MonthlyFor6 {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int uid;
+@EqualsAndHashCode(callSuper = true)
+public class MonthlyFor6 extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "uid")

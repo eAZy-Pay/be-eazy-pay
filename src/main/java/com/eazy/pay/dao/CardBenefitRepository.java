@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CardBenefitRepository extends JpaRepository<CardBenefit, Integer> {
+public interface CardBenefitRepository extends JpaRepository<CardBenefit, Long> {
     List<CardBenefit> findAll();
 }
