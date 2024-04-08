@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 public class Category extends BaseEntity {
 
     @Column(name = "category_name")
-    private String categoryName;
+    private String name;
 }
