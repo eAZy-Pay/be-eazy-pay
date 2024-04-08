@@ -15,11 +15,11 @@ public class CardBenefit extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "card_id", referencedColumnName = "uid")
-    private Card cardId;
+    private Card card;
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "uid")
-    private Category categoryId;
+    private Category category;
 
     @Column(name = "benefit_rate")
     private Integer benefitRate;
