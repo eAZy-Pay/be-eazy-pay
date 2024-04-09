@@ -36,4 +36,7 @@ public class Card extends BaseEntity {
 
     @Column(name = "application_url")
     private String applicationUrl;
+
+    @OneToMany(mappedBy = "card")
+    private List<CardBenefit> cardBenefitList;
 }

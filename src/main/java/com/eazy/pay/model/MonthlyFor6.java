@@ -21,9 +21,7 @@ public class MonthlyFor6 extends BaseEntity {
     @JoinColumn(name = "user_id", referencedColumnName = "uid")
     private User user;
 
-    @Column(name = "base_quater")
-    private String baseQuarter;
-
     @Column(name = "use_amount")
     private int useAmount;
+
 }
