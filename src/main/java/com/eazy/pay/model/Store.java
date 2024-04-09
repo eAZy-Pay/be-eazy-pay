@@ -16,6 +16,6 @@ public class Store extends BaseEntity {
     @JoinColumn(name = "category_id", referencedColumnName = "uid")
     private Category category;
 
-    @Column(name = "store_name")
-    private String storeName;
+    @Column(name = "name")
+    private String name;
 }

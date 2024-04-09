@@ -14,8 +14,8 @@ public class CardDetailDTO {
     private String image;
     private String name;
     private Integer annualFee;
-    private Integer cardBenefitLimit;
+    private Integer benefitLimit;
     private String info;
     private String applicationUrl;
-    private List<CardDetailBenefitDTO> cardBenefitList;
+    private List<CardDetailBenefitDTO> benefitList;
 }

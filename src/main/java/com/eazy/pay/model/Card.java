@@ -29,8 +29,8 @@ public class Card extends BaseEntity {
     @Column(name = "annual_fee")
     private Integer annualFee;
 
-    @Column(name = "card_benefit_limit")
-    private Integer cardBenefitLimit;
+    @Column(name = "benefit_limit")
+    private Integer benefitLimit;
 
     private String info;
 
@@ -38,5 +38,5 @@ public class Card extends BaseEntity {
     private String applicationUrl;
 
     @OneToMany(mappedBy = "card")
-    private List<CardBenefit> cardBenefitList;
+    private List<CardBenefit> benefitList;
 }

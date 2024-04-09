@@ -13,10 +13,7 @@ public interface CardDetailBenefitMapper {
     @Mapping(target = "uid", source = "uid")
     @Mapping(target = "categoryId", source = "category.uid")
     @Mapping(target = "categoryName", source = "category.name")
+    @Mapping(target = "benefitRate", source = "benefitRate")
     CardDetailBenefitDTO toDTO(CardBenefit cardBenefit);
 
-    @Mapping(target = "uid", source = "uid")
-    @Mapping(target = "category.uid", source = "categoryId")
-    @Mapping(target = "category.name", source = "categoryName")
-    CardBenefit toEntity(CardDetailBenefitDTO cardDetailBenefitDTO);
 }
