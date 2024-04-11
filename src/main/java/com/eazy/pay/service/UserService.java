@@ -1,8 +1,10 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.UserRepository;
+import com.eazy.pay.dto.SignInDTO;
 import com.eazy.pay.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -18,10 +20,14 @@ public class UserService implements UserDetailsService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    public User getUser(){return userRepository.findById("fisafisa").orElseThrow(()-> new IllegalArgumentException(String.valueOf("fosafisa")));}
     @Override
-    public User loadUserByUsername(String id) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
         return userRepository.findById(id)
                 .orElseThrow(()-> new IllegalArgumentException(id));
     }
+    public User getUserByUsername(String id) {
+        return userRepository.findById(id)
+                .orElse(null);
+    }
+
 }
