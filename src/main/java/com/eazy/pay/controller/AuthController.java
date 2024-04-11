@@ -21,7 +21,7 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/login")
-    public SignInDTO getuser(@RequestParam("userName") String userName, @RequestParam("userPassword") String userPassword){
+    public SignInDTO getuser(@RequestParam("user_name") String userName, @RequestParam("user_password") String userPassword){
         User user = userService.getUserByUsername(userName);
 
         if (user != null && passwordEncoder.matches(userPassword, user.getPassword())) {
