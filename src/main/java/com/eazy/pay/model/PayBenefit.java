@@ -1,9 +1,7 @@
 package com.eazy.pay.model;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
 
@@ -13,11 +11,12 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 public class PayBenefit extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "card_num", referencedColumnName = "num")
-    private MyCard myCard;
+    private UserCard userCard;
 
     @Column(name = "payment_date")
     private Date paymentDate;

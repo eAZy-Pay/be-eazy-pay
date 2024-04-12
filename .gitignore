@@ -38,3 +38,11 @@ out/
 
 ### application.properties in the resources directory ###
 /src/main/resources/application.properties
+
+### Mac ###
+.DS_Store
+._.DS_Store
+**/.DS_Store
+**/._.DS_Store
+
+/src/main/generated/
