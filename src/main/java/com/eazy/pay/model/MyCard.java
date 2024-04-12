@@ -1,9 +1,8 @@
 package com.eazy.pay.model;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.util.Date;
 import java.util.List;
 
@@ -13,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@SuperBuilder
 public class MyCard extends BaseEntity {
 
     @ManyToOne
@@ -31,8 +31,6 @@ public class MyCard extends BaseEntity {
     private Date expirationDate;
 
     private String password;
-
-    private int performance;
 
     @Column(name = "payment_limit")
     private int paymentLimit;
