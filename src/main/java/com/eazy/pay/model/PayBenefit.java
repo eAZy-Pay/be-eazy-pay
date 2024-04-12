@@ -16,7 +16,7 @@ public class PayBenefit extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "card_num", referencedColumnName = "num")
-    private MyCard myCard;
+    private UserCard userCard;
 
     @Column(name = "payment_date")
     private Date paymentDate;

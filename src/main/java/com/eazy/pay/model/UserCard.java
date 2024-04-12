@@ -4,16 +4,15 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
-import java.util.List;
 
 @Entity
-@Table(name = "my_cards")
+@Table(name = "user_cards")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-public class MyCard extends BaseEntity {
+public class UserCard extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "uid")
