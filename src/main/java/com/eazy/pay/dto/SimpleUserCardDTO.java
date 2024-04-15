@@ -12,5 +12,5 @@ import java.util.List;
 @Builder
 public class SimpleUserCardDTO {
     private int benefitAmount;
-    private List<Card> card;
+    private List<Card> cards;
 }

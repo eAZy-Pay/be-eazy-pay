@@ -52,7 +52,7 @@ public class CardController {
         }
         return SimpleUserCardDTO.builder()
                 .benefitAmount(benefitAmount)
-                .card(cards)
+                .cards(cards)
                 .build();
     }
 
