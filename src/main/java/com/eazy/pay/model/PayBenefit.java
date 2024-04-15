@@ -1,4 +1,5 @@
 package com.eazy.pay.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -13,7 +14,6 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 public class PayBenefit extends BaseEntity {
-
     @ManyToOne
     @JoinColumn(name = "card_num", referencedColumnName = "num")
     private UserCard userCard;

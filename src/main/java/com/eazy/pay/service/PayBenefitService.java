@@ -5,6 +5,8 @@ import com.eazy.pay.dao.PayBenefitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -16,4 +18,6 @@ public class PayBenefitService {
     public List<PayBenefit> getAllPayBenefits() {
         return payBenefitRepository.findAll();
     }
+
+    public List<PayBenefit> getPayBenefitsForNMonthByCardNum(String num, int month){ return payBenefitRepository.findByCardNumAndDateWithinDate(num, Timestamp.valueOf(LocalDate.now().minusMonths(month).atStartOfDay())).orElse(null);}
 }

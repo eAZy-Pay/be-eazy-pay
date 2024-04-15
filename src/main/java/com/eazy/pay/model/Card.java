@@ -1,4 +1,5 @@
 package com.eazy.pay.model;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -40,6 +41,7 @@ public class Card extends BaseEntity {
     @Column(name = "application_url")
     private String applicationUrl;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "card")
     private List<CardBenefit> benefitList;
 }

@@ -1,4 +1,5 @@
 package com.eazy.pay.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -12,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class CardBenefit extends BaseEntity {
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "card_id", referencedColumnName = "uid")
     private Card card;
