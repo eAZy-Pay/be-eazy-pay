@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/register")
 public class RegisterController {
 
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping(value = "/register")
+    @PostMapping
     public ResponseEntity registerUser(@RequestBody User user) {
         try {
             user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
