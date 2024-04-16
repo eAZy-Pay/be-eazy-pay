@@ -1,15 +1,20 @@
 package com.eazy.pay.model;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import lombok.experimental.SuperBuilder;
 import java.util.Collection;
+
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
@@ -26,7 +31,8 @@ public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "phone_number")
     private String phoneNumber;
-
+    @Column(name = "birthday")
+    @JsonFormat(pattern = "yyyyMMdd")
     private Date birthday;
 
     private String pin;
