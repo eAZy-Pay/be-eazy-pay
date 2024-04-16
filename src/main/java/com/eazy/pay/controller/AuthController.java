@@ -9,7 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,12 +20,10 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/login")
+    @GetMapping("/login")
     public SignInDTO getuser(@RequestParam("user_name") String userName, @RequestParam("user_password") String userPassword){
         User user = userService.getUserByUsername(userName);
-
         if (user != null && passwordEncoder.matches(userPassword, user.getPassword())) {
-
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return new SignInDTO(HttpStatus.OK, user.getUid(), user.getUsername(), user.getIsAdmin());
