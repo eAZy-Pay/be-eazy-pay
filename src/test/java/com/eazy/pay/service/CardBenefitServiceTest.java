@@ -2,13 +2,16 @@ package com.eazy.pay.service;
 
 import com.eazy.pay.dao.CardBenefitRepository;
 import com.eazy.pay.dto.CardDTO;
+import com.eazy.pay.dto.CardWithBenefitDTO;
 import com.eazy.pay.model.Card;
 import com.eazy.pay.model.CardBenefit;
 import com.eazy.pay.model.Category;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
@@ -17,7 +20,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+// @SpringBootTest -> @ExtendWith(MockitoExtension.class)로 바꿔줌
+// @SpringBootTest는 필요한 모든 컨텍스트를 로드하기 때문에 느릴 수 있음
+// 따라선 단위 테스트에서는 필요한 빈들만 로드하는 MockitoExtension을 사용하는 것이 더 적합하다
+@ExtendWith(MockitoExtension.class) // Mockito 확장 기능 활성화
 class CardBenefitServiceTest {
 
     @Mock
@@ -55,6 +61,11 @@ class CardBenefitServiceTest {
                 .name("외식")
                 .build();
 
+        Category category2 = Category.builder()
+                .uid(2L)
+                .name("차량")
+                .build();
+
         CardBenefit cardBenefit1 = CardBenefit.builder()
                 .card(card1)
                 .category(category1)
@@ -64,7 +75,13 @@ class CardBenefitServiceTest {
         CardBenefit cardBenefit2 = CardBenefit.builder()
                 .card(card2)
                 .category(category1)
-                .benefitRate(1)
+                .benefitRate(2)
+                .build();
+
+        CardBenefit cardBenefit3 = CardBenefit.builder()
+                .card(card1)
+                .category(category2)
+                .benefitRate(2)
                 .build();
 
         List<CardBenefit> cardBenefitList = Arrays.asList(cardBenefit1, cardBenefit2);
@@ -73,13 +90,12 @@ class CardBenefitServiceTest {
 
     }
 
-
     @Test
     void getCategoryCards() {
-        //when: getCategoryCards 메서드 실행 카테고리 uid가 1인 카드 목록을 조회
+        // getCategoryCards 메서드 실행 카테고리 uid가 1인 카드 목록을 조회
         List<CardDTO> result = cardBenefitService.getCardsByCategoryId(1L);
 
-        // then: 카테고리 uid가 1인 카드 목록이 조회되어야 함
+        // 카테고리 uid가 1인 카드 목록이 조회되어야 함
         assertEquals(2, result.size());
         assertEquals("image1", result.get(0).getImage());
         assertEquals("외식 카드", result.get(0).getName());
@@ -100,4 +116,5 @@ class CardBenefitServiceTest {
         // cardBenefitRepository.findByCategoryUid(1L) 메서드가 1번 호출되었는지 검증
         verify(cardBenefitRepository, times(1)).findByCategoryUid(1L);
     }
+
 }
