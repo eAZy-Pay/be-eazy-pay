@@ -18,6 +18,4 @@ public class PayBenefitService {
     public List<PayBenefit> getAllPayBenefits() {
         return payBenefitRepository.findAll();
     }
-
-    public List<PayBenefit> getPayBenefitsForNMonthByCardNum(String num, int month){ return payBenefitRepository.findByCardNumAndDateWithinDate(num, Timestamp.valueOf(LocalDate.now().minusMonths(month).atStartOfDay())).orElse(null);}
 }

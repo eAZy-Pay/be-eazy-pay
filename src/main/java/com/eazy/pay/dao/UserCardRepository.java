@@ -10,7 +10,4 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
     List<UserCard> findAll();
     @Query("SELECT uc FROM UserCard uc WHERE uc.user.uid =?1")
     List<UserCard> findByUserId(Long userId);
-
-    @Query("SELECT uc FROM UserCard uc WHERE uc.user.uid =?1 ORDER BY uc.uid limit 4")
-    List<UserCard> findByUserIdLimit4(Long userId);
 }

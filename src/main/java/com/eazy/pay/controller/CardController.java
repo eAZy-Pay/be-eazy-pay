@@ -37,30 +37,10 @@ public class CardController {
         }
     }
 
-    @PostMapping("/main-banner")
+    @PostMapping("/card-benefit-simple")
     public SimpleUserCardDTO getMainBenner(@RequestBody Long userId){
         //최대 4개 카드 선택 (아직 정렬 x)
-        List<UserCard> userCards = userCardService.getUserCardsByUserIdWithLimit4(userId);
-
-        int benefitAmount = 0;
-        List<Card> cards = new ArrayList<>();
-        for(UserCard uc : userCards){
-            Card card = uc.getCard();
-            cards.add(card);
-
-            String cardNum = uc.getNum();
-            //카드들의 최근N개월 모든 거래내역 -> 합계가 혜택 최대값을 넘으면 break.
-            List<PayBenefit> payBenefitsFor3  = payBenefitService.getPayBenefitsForNMonthByCardNum(cardNum, 3);
-            for (PayBenefit pb : payBenefitsFor3){
-                benefitAmount += pb.getBenefitAmount();
-                if(benefitAmount >= card.getBenefitLimit()){ benefitAmount = card.getBenefitLimit(); break;}
-            }
-
-        }
-        return SimpleUserCardDTO.builder()
-                .benefitAmount(benefitAmount)
-                .cards(cards)
-                .build();
+        return userCardService.getSimpleBenefitByUserId(userId);
     }
 
 }
