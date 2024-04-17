@@ -8,5 +8,8 @@ import java.util.List;
 
 @Repository
 public interface CardBenefitRepository extends JpaRepository<CardBenefit, Long> {
+
+    List<CardBenefit> findAll();
+
     List<CardBenefit> findByCategoryUid(Long categoryId);
 }
