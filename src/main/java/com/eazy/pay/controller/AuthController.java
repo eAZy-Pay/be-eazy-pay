@@ -26,7 +26,6 @@ public class AuthController {
         if (user != null && passwordEncoder.matches(userPassword, user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            System.out.println(user.getUsername());
             return new SignInDTO(HttpStatus.OK, user.getUid(), user.getUsername(), user.getIsAdmin());
         } else {
             return new SignInDTO(HttpStatus.UNAUTHORIZED);
