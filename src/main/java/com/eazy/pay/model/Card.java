@@ -30,8 +30,6 @@ public class Card extends BaseEntity {
     @Column(name = "annual_fee")
     private Integer annualFee;
 
-    private Integer performance;
-
     @Column(name = "benefit_limit")
     private Integer benefitLimit;
 
