@@ -1,7 +1,6 @@
 package com.eazy.pay.dto;
 
 import com.eazy.pay.model.Card;
-import com.eazy.pay.model.PayBenefit;
 import lombok.*;
 
 import java.util.List;
@@ -10,8 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 @Builder
-public class SimpleUserCardDTO {
-    private Card card;
+public class BenefitAndSimpleUserCardsDTO {
     private int benefitAmount;
-    private int useAmount;
+    private List<SimpleUserCardDTO> cards;
 }
