@@ -1,4 +1,5 @@
 package com.eazy.pay.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,9 +37,12 @@ public class Card extends BaseEntity {
 
     private String info;
 
+    private Integer performance;
+
     @Column(name = "application_url")
     private String applicationUrl;
-    
+
+    @JsonManagedReference
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY) // 지연로딩: 필요할 때만 데이터를 가져온다.
     private List<CardBenefit> benefitList;
 }
