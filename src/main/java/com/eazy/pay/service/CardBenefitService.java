@@ -16,15 +16,6 @@ public class CardBenefitService {
     @Autowired
     private CardBenefitRepository cardBenefitRepository;
 
-    public List<CardDTO> getAllCards() {
-        List<CardDTO> cardDTOList = cardBenefitRepository.findAll().stream()
-                .map(CardBenefit::getCard)
-                .map(CardMapper.INSTANCE::toDTO)
-                .collect(Collectors.toList());
-
-        return cardDTOList;
-    }
-
     public List<CardDTO> getCardsByCategoryId(Long categoryId) {
         List<CardDTO> cardDTOList = cardBenefitRepository.findByCategoryUid(categoryId).stream()
                 .map(CardBenefit::getCard)
