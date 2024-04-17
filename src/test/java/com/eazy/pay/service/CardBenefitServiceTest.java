@@ -77,7 +77,7 @@ class CardBenefitServiceTest {
     @Test
     void getCategoryCards() {
         //when: getCategoryCards 메서드 실행 카테고리 uid가 1인 카드 목록을 조회
-        List<CardDTO> result = cardBenefitService.getCategoryCards(1L);
+        List<CardDTO> result = cardBenefitService.getCardsByCategoryId(1L);
 
         // then: 카테고리 uid가 1인 카드 목록이 조회되어야 함
         assertEquals(2, result.size());
