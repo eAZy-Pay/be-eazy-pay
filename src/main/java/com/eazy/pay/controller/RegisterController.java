@@ -36,6 +36,16 @@ public class RegisterController {
             return ResponseEntity.ok("id available");
         }
     }
+
+    @GetMapping(value = "/checkmember")
+    public ResponseEntity checkMember(@RequestParam("name") String name, @RequestParam("phoneNumber") String phoneNumber) {
+        Optional<User> ou = this.userRepository.findByNameAndPhoneNumber(name, phoneNumber);
+        if (ou.isPresent()) {
+            return ResponseEntity.ok("member exists");
+        } else {
+            return ResponseEntity.status(404).body("member not exists");
+        }
+    }
 }
 
 
