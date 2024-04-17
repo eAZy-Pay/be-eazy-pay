@@ -21,8 +21,6 @@ public class CardController {
     private  CardService cardService;
     @Autowired
     private UserCardService userCardService;
-    @Autowired
-    private PayBenefitService payBenefitService;
 
     @GetMapping
     public List<CardDTO> getCards(
