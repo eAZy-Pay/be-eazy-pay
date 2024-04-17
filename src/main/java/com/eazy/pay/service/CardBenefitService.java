@@ -2,9 +2,7 @@ package com.eazy.pay.service;
 
 import com.eazy.pay.dao.CardBenefitRepository;
 import com.eazy.pay.dto.CardDTO;
-import com.eazy.pay.dto.CardDetailDTO;
 import com.eazy.pay.mapper.CardMapper;
-import com.eazy.pay.mapper.CardDetailMapper;
 import com.eazy.pay.model.CardBenefit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,5 +33,4 @@ public class CardBenefitService {
 
         return cardDTOList;
     }
-
 }
