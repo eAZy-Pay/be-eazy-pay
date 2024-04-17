@@ -2,9 +2,6 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.CardDTO;
 import com.eazy.pay.dto.SimpleUserCardDTO;
-import com.eazy.pay.model.Card;
-import com.eazy.pay.model.PayBenefit;
-import com.eazy.pay.model.UserCard;
 import com.eazy.pay.service.CardBenefitService;
 import com.eazy.pay.service.CardService;
 import com.eazy.pay.service.PayBenefitService;
@@ -14,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/cards")
@@ -26,8 +24,18 @@ public class CardController {
     private PayBenefitService payBenefitService;
 
     @GetMapping
-    public List<CardDTO> getCategoryCards(@RequestParam("category_id") Long categoryId) {
-        return cardBenefitService.getCategoryCards(categoryId);
+    public List<CardDTO> getCards(
+            // Optional을 사용하여 값이 없을 때를 대비
+            @RequestParam(value = "category_id", required = false) Optional<Long> categoryId,
+            @RequestParam(value = "name", required = false) Optional<String> name) {
+        // isPresent()를 사용하여 값이 있는지 확인
+        if (categoryId.isPresent()) {
+            return cardBenefitService.getCardsByCategoryId(categoryId.get());
+        } else if (name.isPresent()) {
+            return cardService.getCardsLikeName(name.get());
+        } else {
+            return cardBenefitService.getAllCards();  // 모든 카드를 반환, 나중에 수정 필요
+        }
     }
 
     @PostMapping("/main-banner")
