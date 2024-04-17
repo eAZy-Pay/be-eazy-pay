@@ -38,7 +38,6 @@ public class UserCardService {
         List<UserCard> userCards = userCardRepository.findByUserId(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
         int totalBenefitAmount = 0; // 모든 카드들의 3개월간 혜택
 
-
         List<SimpleUserCardDTO> cards = new ArrayList<>(); //리턴할 DTO에 넣어줄 보유카드의 상품+사용 정보
         List<SimpleUserCardDTO> beforeSort = new ArrayList<>(); //모든 보유카드의 계산된 사용 정보에 따라 정렬하기 전 임시 리스트
 
@@ -57,7 +56,6 @@ public class UserCardService {
                 benefitAmount3 += pb.getBenefitAmount();
                 }
             }
-
 
             totalBenefitAmount += benefitAmount3;
 
@@ -88,7 +86,6 @@ public class UserCardService {
         // 계산되어 나온 SimpleUserCardDTO를 benefitAmount로 정렬한 뒤 useAmount로 정렬해주기
 
         sortUserCards(beforeSort);  // 정렬 로직 호출
-
 
         // 정렬된 리스트를 최대 4개의 요소만 선택하고 cards에 할당
         int maxSize = Math.min(beforeSort.size(), 4);
