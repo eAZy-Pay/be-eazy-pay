@@ -38,6 +38,6 @@ public class Card extends BaseEntity {
     @Column(name = "application_url")
     private String applicationUrl;
 
-    @OneToMany(mappedBy = "card")
+    @OneToMany(mappedBy = "card", fetch = FetchType.LAZY) // 지연로딩: 필요할 때만 데이터를 가져온다.
     private List<CardBenefit> benefitList;
 }

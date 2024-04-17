@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class CardDetailBenefitDTO {
+public class CardBenefitDTO {
     private Long uid;
     private Long categoryId;
     private String categoryName;
