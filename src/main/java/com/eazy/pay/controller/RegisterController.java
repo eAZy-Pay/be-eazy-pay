@@ -28,8 +28,8 @@ public class RegisterController {
     }
 
     @GetMapping(value = "/checkid")
-    public ResponseEntity checkId(@RequestParam("id") String id) {
-        Optional<User> ou = this.userRepository.findById(id);
+    public ResponseEntity checkId(@RequestParam("id") String strId) {
+        Optional<User> ou = this.userRepository.findByStrId(strId);
         if (ou.isPresent()) {
             return ResponseEntity.status(409).body("id already exists");
         } else {
