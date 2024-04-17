@@ -2,6 +2,9 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.CardDTO;
 import com.eazy.pay.dto.SimpleUserCardDTO;
+import com.eazy.pay.model.Card;
+import com.eazy.pay.model.PayBenefit;
+import com.eazy.pay.model.UserCard;
 import com.eazy.pay.service.CardBenefitService;
 import com.eazy.pay.service.CardService;
 import com.eazy.pay.service.PayBenefitService;
@@ -18,6 +21,8 @@ import java.util.Optional;
 public class CardController {
     @Autowired
     private CardBenefitService cardBenefitService;
+    @Autowired
+    private  CardService cardService;
     @Autowired
     private UserCardService userCardService;
     @Autowired
@@ -38,7 +43,7 @@ public class CardController {
         }
     }
 
-    @PostMapping("/main-banner")
+    @PostMapping("/simple-benefit-dashboard")
     public SimpleUserCardDTO getMainBenner(@RequestBody Long userId){
         //최대 4개 카드 선택 (아직 정렬 x)
         List<UserCard> userCards = userCardService.getUserCardsByUserIdWithLimit4(userId);
