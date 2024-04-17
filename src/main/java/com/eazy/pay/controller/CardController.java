@@ -2,6 +2,7 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.BenefitAndSimpleUserCardsDTO;
 import com.eazy.pay.dto.CardDTO;
+import com.eazy.pay.dto.CardWithBenefitDTO;
 import com.eazy.pay.service.CardBenefitService;
 import com.eazy.pay.service.CardService;
 import com.eazy.pay.service.PayBenefitService;
@@ -33,11 +34,20 @@ public class CardController {
         } else if (name.isPresent()) {
             return cardService.getCardsLikeName(name.get());
         } else {
-            return cardBenefitService.getAllCards();  // 모든 카드를 반환, 나중에 수정 필요
+            return cardService.getAllCards();  // 모든 카드를 반환, 나중에 수정 필요
         }
     }
     @PostMapping("/simple-user-card-benefit-performance")public BenefitAndSimpleUserCardsDTO getBenefitSimple(@RequestBody Long userId){    //최대 4개 카드 선택 (아직 정렬 x)
       return userCardService.getSimpleBenefitDashboardByUserId(userId);
     }
 
+    @GetMapping("/{card_id}")
+    public CardDTO getCardByCardId(@PathVariable("card_id") Long cardId) {
+        return cardService.getCardById(cardId);
+    }
+
+    @GetMapping("/{card_id}/benefits")
+    public CardWithBenefitDTO getCardWithBenefitByCardId(@PathVariable("card_id") Long cardId) {
+        return cardService.getCardWithBenefitByCardId(cardId);
+    }
 }

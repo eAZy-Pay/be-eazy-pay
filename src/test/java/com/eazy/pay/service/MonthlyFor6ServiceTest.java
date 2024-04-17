@@ -7,8 +7,10 @@ import com.eazy.pay.model.User;
 import com.eazy.pay.model.Category;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
@@ -17,7 +19,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class) // MockitoExtension을 사용하여 Mock 객체를 주입받을 수 있도록 설정
 class MonthlyFor6ServiceTest {
 
     @Mock

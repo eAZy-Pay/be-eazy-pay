@@ -18,7 +18,7 @@ public class CardBenefit extends BaseEntity {
     @JoinColumn(name = "card_id", referencedColumnName = "uid")
     private Card card;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // 지연로딩: 필요할 때만 데이터를 가져온다.
     @JoinColumn(name = "category_id", referencedColumnName = "uid")
     private Category category;
 

@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class CardDetailDTO {
+public class CardWithBenefitDTO {
     private Long uid;
     private String image;
     private String name;
@@ -18,5 +18,5 @@ public class CardDetailDTO {
     private Integer benefitLimit;
     private String info;
     private String applicationUrl;
-    private List<CardDetailBenefitDTO> benefitList;
+    private List<CardBenefitDTO> benefitList;
 }
