@@ -40,13 +40,8 @@ public class CardController {
       return userCardService.getSimpleBenefitDashboardByUserId(userId);
     }
 
-    @GetMapping("/{card_id}")
-    public CardDTO getCardByCardId(@PathVariable("card_id") Long cardId) {
-        return cardService.getCardById(cardId);
-    }
-
-    @GetMapping("/{card_id}/benefits")
-    public CardWithBenefitDTO getCardWithBenefitByCardId(@PathVariable("card_id") Long cardId) {
+    @GetMapping("/{cardId}")
+    public CardWithBenefitDTO getCardWithBenefitByCardId(@PathVariable("cardId") Long cardId) {
         return cardService.getCardWithBenefitByCardId(cardId);
     }
 }
