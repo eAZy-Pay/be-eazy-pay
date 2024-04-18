@@ -2,6 +2,7 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dao.UserRepository;
 import com.eazy.pay.model.User;
+import com.eazy.pay.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,36 +15,34 @@ import java.util.Optional;
 public class RegisterController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
+
 
     @PostMapping
     public ResponseEntity registerUser(@RequestBody User user) {
-        try {
-            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            User registerUser = userRepository.save(user);
-            return ResponseEntity.ok(registerUser);
-        } catch (Exception e) {
+        if (userService.registerUser(user)){
+            return ResponseEntity.ok("registration success"); // 보유 카드 정보를 반환. 이름, 이미지만 응답
+        } else {
             return ResponseEntity.status(500).body("registration fail");
         }
     }
 
     @GetMapping(value = "/checkid")
     public ResponseEntity checkId(@RequestParam("id") String strId) {
-        Optional<User> ou = this.userRepository.findByStrId(strId);
-        if (ou.isPresent()) {
-            return ResponseEntity.status(409).body("id already exists");
-        } else {
+        if (userService.getUserByStrId(strId) == null) {
             return ResponseEntity.ok("id available");
+        } else {
+            return ResponseEntity.status(409).body("id already exists");
         }
     }
 
     @GetMapping(value = "/checkmember")
-    public ResponseEntity checkMember(@RequestParam("name") String name, @RequestParam("phoneNumber") String phoneNumber) {
-        Optional<User> ou = this.userRepository.findByNameAndPhoneNumber(name, phoneNumber);
-        if (ou.isPresent()) {
-            return ResponseEntity.ok("member exists");
+    public ResponseEntity checkMember(@RequestParam("name") String name,
+                                      @RequestParam("phoneNumber") String phoneNumber) {
+        if (userService.findByNameAndPhoneNumber(name, phoneNumber) != null) {
+            return ResponseEntity.ok("member not exists");
         } else {
-            return ResponseEntity.status(404).body("member not exists");
+            return ResponseEntity.status(409).body("member exists");
         }
     }
 }
