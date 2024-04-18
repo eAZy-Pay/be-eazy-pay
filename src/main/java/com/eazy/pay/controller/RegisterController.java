@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -20,10 +22,17 @@ public class RegisterController {
 
     @PostMapping
     public ResponseEntity registerUser(@RequestBody User user) {
-        if (userService.registerUser(user)){
-            return ResponseEntity.ok("registration success"); // 보유 카드 정보를 반환. 이름, 이미지만 응답
-        } else {
-            return ResponseEntity.status(500).body("registration fail");
+        try {
+            User registeredUser = userService.registerUser(user);
+            // 등록에 성공하면 응답을 UserCard의 이름, 이미지로 변경할 예정
+            Map<String, Object> response = new HashMap<>();
+            response.put("name", registeredUser.getName());
+            response.put("email", registeredUser.getEmail());
+//            System.out.println(ResponseEntity.ok(response));
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            // 실패 시 적절한 HTTP 상태 코드와 메시지 반환
+            return ResponseEntity.status(500).body("Registration failed: " + e.getMessage());
         }
     }
 

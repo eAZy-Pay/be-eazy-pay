@@ -34,21 +34,15 @@ public class UserService implements UserDetailsService {
                 .orElse(null);
     }
 
-    public boolean registerUser(User user) {
-        try {
-            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            User registerUser = userRepository.save(user);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    public User registerUser(User user) {
+        user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+        return userRepository.save(user);  // save 메소드가 등록된 사용자 객체를 반환
     }
 
     public User findByNameAndPhoneNumber(String name, String phoneNumber) {
         return userRepository.findByNameAndPhoneNumber(name, phoneNumber)
                 .orElse(null);
     }
-
 
 
 }
