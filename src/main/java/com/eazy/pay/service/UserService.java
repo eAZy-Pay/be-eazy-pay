@@ -17,17 +17,16 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return null; // UserDetailService 구현
+    }
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
-    @Override
-    public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        return userRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException(id));
-    }
-    public User getUserByUsername(String id) {
-        return userRepository.findById(id)
+
+    public User getUserByStrId(String strId) {
+        return userRepository.findByStrId(strId)
                 .orElse(null);
     }
 

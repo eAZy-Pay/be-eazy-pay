@@ -24,16 +24,19 @@ public class UserCard extends BaseEntity {
 
     private String num;
 
-    private String cvc;
+    //private String cvc;
 
     @Column(name = "expiration_date")
     private Date expirationDate;
 
     private String password;
 
+
     @Column(name = "payment_limit")
     private int paymentLimit;
 
     @Column(name = "link_eazy")
     private boolean linkEazy;
+
+
 }

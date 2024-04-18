@@ -1,9 +1,12 @@
 package com.eazy.pay.controller;
 
+import com.eazy.pay.dto.BenefitAndSimpleUserCardsDTO;
 import com.eazy.pay.dto.CardDTO;
 import com.eazy.pay.dto.CardWithBenefitDTO;
 import com.eazy.pay.service.CardBenefitService;
 import com.eazy.pay.service.CardService;
+import com.eazy.pay.service.PayBenefitService;
+import com.eazy.pay.service.UserCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +18,10 @@ import java.util.Optional;
 public class CardController {
     @Autowired
     private CardBenefitService cardBenefitService;
-
     @Autowired
     private  CardService cardService;
+    @Autowired
+    private UserCardService userCardService;
 
     @GetMapping
     public List<CardDTO> getCards(
@@ -32,6 +36,9 @@ public class CardController {
         } else {
             return cardService.getAllCards();  // 모든 카드를 반환, 나중에 수정 필요
         }
+    }
+    @PostMapping("/simple-user-card-benefit-performance")public BenefitAndSimpleUserCardsDTO getBenefitSimple(@RequestBody Long userId){    //최대 4개 카드 선택 (아직 정렬 x)
+      return userCardService.getSimpleBenefitDashboardByUserId(userId);
     }
 
     @GetMapping("/{card_id}")

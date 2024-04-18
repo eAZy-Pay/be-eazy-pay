@@ -21,8 +21,8 @@ public class AuthController {
     private UserService userService;
 
     @GetMapping("/login")
-    public SignInDTO getuser(@RequestParam("user_name") String userName, @RequestParam("user_password") String userPassword){
-        User user = userService.getUserByUsername(userName);
+    public SignInDTO getuser(@RequestParam("user_name") String strId, @RequestParam("user_password") String userPassword){
+        User user = userService.getUserByStrId(strId);
         if (user != null && passwordEncoder.matches(userPassword, user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
