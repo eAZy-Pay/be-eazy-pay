@@ -36,8 +36,8 @@ public class CardController {
                         name.map(cardService::getCardsLikeName) // name이 있는 경우 해당하는 카드 반환
                                 .orElseGet(cardService::getAllCards)); // name이 없는 경우 모든 카드 반환
     }
-    @PostMapping("/simple-user-card-benefit-performance")public BenefitAndSimpleUserCardsDTO getBenefitSimple(@RequestBody Long userId){    //최대 4개 카드 선택 (아직 정렬 x)
-      return userCardService.getSimpleBenefitDashboardByUserId(userId);
+    @GetMapping("/simple-user-card-benefit-performance")public BenefitAndSimpleUserCardsDTO getBenefitSimple(@RequestParam("user_id") Long userId){    //최대 4개 카드 선택 (아직 정렬 x)
+        return userCardService.getSimpleBenefitDashboardByUserId(userId);
     }
 
     @GetMapping("/{cardId}")
