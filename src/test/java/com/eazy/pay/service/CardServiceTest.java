@@ -2,7 +2,10 @@ package com.eazy.pay.service;
 
 import com.eazy.pay.dao.CardRepository;
 import com.eazy.pay.dto.CardDTO;
+import com.eazy.pay.dto.CardWithBenefitDTO;
 import com.eazy.pay.model.Card;
+import com.eazy.pay.model.CardBenefit;
+import com.eazy.pay.model.Category;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -58,6 +62,34 @@ class CardServiceTest {
         // cardRepository.findByNameContaining("무실적") 메서드가 호출되면 card2를 반환하도록 설정
         lenient().when(cardRepository.findByNameContaining("무실적")).thenReturn(List.of(card2));
 
+        Category category1 = Category.builder()
+                .uid(1L)
+                .name("외식")
+                .build();
+
+        Category category2 = Category.builder()
+                .uid(2L)
+                .name("차량")
+                .build();
+
+        CardBenefit cardBenefit1 = CardBenefit.builder()
+                .card(card2)
+                .category(category1)
+                .benefitRate(4)
+                .build();
+
+        CardBenefit cardBenefit2 = CardBenefit.builder()
+                .card(card2)
+                .category(category2)
+                .benefitRate(2)
+                .build();
+
+        List<CardBenefit> cardBenefitList = List.of(cardBenefit1, cardBenefit2);
+
+        card2.setBenefitList(cardBenefitList);
+
+        lenient().when(cardRepository.findByUid(2L)).thenReturn(Optional.of(card2));
+
     }
 
 
@@ -88,5 +120,23 @@ class CardServiceTest {
 
         // cardRepository.findByNameContaining("무실적") 메서드가 1번 호출되었는지 확인
         verify(cardRepository, times(1)).findByNameContaining("무실적");
+    }
+
+    @Test
+    void getCardWithBenefitByCardId() {
+
+        // CardService의 getCardWithBenefitByCardId(2L) 메서드를 실행 카드 id가 2인 카드 정보를 조회
+        CardWithBenefitDTO cardWithBenefitDTO = cardService.getCardWithBenefitByCardId(2L);
+
+        // cardWithBenefitDTO에는 card2와 card2의 혜택 정보가 포함되어 있어야 함
+        assertEquals("무실적 카드", cardWithBenefitDTO.getCard().getName());
+        assertEquals(2, cardWithBenefitDTO.getBenefitList().size());
+        assertEquals("외식", cardWithBenefitDTO.getBenefitList().get(0).getCategoryName());
+        assertEquals(4, cardWithBenefitDTO.getBenefitList().get(0).getBenefitRate());
+        assertEquals("차량", cardWithBenefitDTO.getBenefitList().get(1).getCategoryName());
+        assertEquals(2, cardWithBenefitDTO.getBenefitList().get(1).getBenefitRate());
+
+        // cardRepository.findByUid(2L) 메서드가 1번 호출되었는지 확인
+        verify(cardRepository, times(1)).findByUid(2L);
     }
 }
