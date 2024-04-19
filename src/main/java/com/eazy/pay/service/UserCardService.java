@@ -1,10 +1,11 @@
 package com.eazy.pay.service;
 
-import com.eazy.pay.dao.PayBenefitRepository;
+import com.eazy.pay.dao.PaymentHistoryRepository;
 import com.eazy.pay.dto.BenefitAndSimpleUserCardsDTO;
+import com.eazy.pay.dto.PaymentHistoryDTO;
 import com.eazy.pay.dto.SimpleUserCardDTO;
 import com.eazy.pay.model.Card;
-import com.eazy.pay.model.PayBenefit;
+import com.eazy.pay.model.PaymentHistory;
 import com.eazy.pay.model.UserCard;
 import com.eazy.pay.dao.UserCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +22,9 @@ public class UserCardService {
 
     @Autowired
     private UserCardRepository userCardRepository;
+
     @Autowired
-    private PayBenefitRepository payBenefitRepository;
+    private PaymentHistoryRepository paymentHistoryRepository;
 
     public List<UserCard> getAllUserCards() {
         return userCardRepository.findAll();
@@ -47,12 +49,12 @@ public class UserCardService {
             String cardNum = uc.getNum();
 
             //해당 보유 카드의 최근3개월 모든 거래내역
-            List<PayBenefit> payBenefitsFor3 =
-                    payBenefitRepository.findByCardNumAndDateWithinDate(cardNum,
+            List<PaymentHistory> payBenefitsFor3 =
+                    paymentHistoryRepository.findByCardNumAndDateWithinDate(cardNum,
                             Timestamp.valueOf(LocalDate.now().minusMonths(3).atStartOfDay())
                     ).orElse(null);
             if (payBenefitsFor3 != null){
-                for (PayBenefit pb : payBenefitsFor3) {
+                for (PaymentHistory pb : payBenefitsFor3) {
                 benefitAmount3 += pb.getBenefitAmount();
                 }
             }
@@ -62,13 +64,13 @@ public class UserCardService {
             int benefitAmount1 = 0; // 이번 달 혜택
             int useAmount = 0; // 이번 달 사용액
             //해당 보유 카드의 최근 1개월 모든 거래 내역
-            List<PayBenefit> payBenefitsFor1 =
-                    payBenefitRepository.findByCardNumAndDateWithinDate(cardNum,
+            List<PaymentHistory> payBenefitsFor1 =
+                    paymentHistoryRepository.findByCardNumAndDateWithinDate(cardNum,
                             Timestamp.valueOf(LocalDate.now().minusMonths(1).atStartOfDay())
                     ).orElse(null);
 
             if (payBenefitsFor1 != null){ // 거래내역이 아예 없으면 게산하지 않음
-                for (PayBenefit pb : payBenefitsFor1) {
+                for (PaymentHistory pb : payBenefitsFor1) {
                     benefitAmount1 += pb.getBenefitAmount();
                     useAmount += pb.getPaymentAmount();
                 }
