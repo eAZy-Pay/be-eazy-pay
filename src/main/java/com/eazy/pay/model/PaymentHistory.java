@@ -17,6 +17,7 @@ public class PaymentHistory extends BaseEntity {
     @Column(name = "card_num")
     private String cardNum;
 
+
     @Column(name = "payment_date")
     private Date paymentDate;
 

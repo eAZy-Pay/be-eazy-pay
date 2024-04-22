@@ -31,4 +31,5 @@ public class PaymentHistoryService {
     }
 
     public List<PaymentHistory> getPayBenefitsForNMonthByCardNum(String num, int month){ return paymentHistoryRepository.findByCardNumAndDateWithinDate(num, Timestamp.valueOf(LocalDate.now().minusMonths(month).atStartOfDay())).orElse(null);}
+
 }
