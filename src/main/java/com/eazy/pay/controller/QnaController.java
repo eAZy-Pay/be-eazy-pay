@@ -38,6 +38,15 @@ public class QnaController {
         }
     }
 
+    @PostMapping
+    public  ResponseEntity postQnaPost(@RequestBody QnaDTO dto) throws ParseException {
+        if(questionService.createQna(dto)){
+            return new ResponseEntity<>("게시글이 성공적으로 등록되었습니다.", HttpStatus.OK);
+        } else{
+            return new ResponseEntity<>("비정상", HttpStatus.CONFLICT);
+        }
+    }
+
     @DeleteMapping
     public ResponseEntity deleteQnaPost(@RequestParam(value = "uid") Long uid){
         if (questionService.deleteQnaById(uid)) { // TODO: 조회 후 있으면 삭제 되도록 변경
