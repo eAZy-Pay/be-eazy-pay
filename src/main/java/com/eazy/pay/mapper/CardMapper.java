@@ -13,4 +13,6 @@ public interface CardMapper {
     @Mapping(target = "uid", source = "uid")
     CardDTO toDTO(Card card);
 
+    @Mapping(target = "uid", source = "uid")
+    Card toEntity(CardDTO cardDTO);
 }

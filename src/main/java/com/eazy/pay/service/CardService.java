@@ -8,6 +8,8 @@ import com.eazy.pay.model.Card;
 import com.eazy.pay.dao.CardRepository;
 import com.eazy.pay.model.CardBenefit;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,19 +21,16 @@ public class CardService {
     @Autowired
     private CardRepository cardRepository;
 
-    public List<CardDTO> getAllCards() {
+    public Page<CardDTO> getAllCards(Pageable pageable) {
 
-        return cardRepository.findAll().stream()
-                .map(CardMapper.INSTANCE::toDTO)
-                .collect(Collectors.toList());
+        return cardRepository.findAll(pageable)
+                .map(CardMapper.INSTANCE::toDTO);
     }
 
-    public List<CardDTO> getCardsLikeName(String name) {
-        List<CardDTO> cardDTOList = cardRepository.findByNameContaining(name).stream()
-                .map(CardMapper.INSTANCE::toDTO)
-                .collect(Collectors.toList());
+    public Page<CardDTO> getCardsLikeName(String name, Pageable pageable) {
 
-        return cardDTOList;
+        return cardRepository.findByNameContaining(name, pageable)
+                .map(CardMapper.INSTANCE::toDTO);
     }
 
     public CardWithBenefitDTO getCardWithBenefitByCardId(Long cardId) {
@@ -40,5 +39,15 @@ public class CardService {
 
     public CardDTO getCardById(Long cardId) {
         return CardMapper.INSTANCE.toDTO(cardRepository.findByUid(cardId).orElse(null));
+    }
+
+    public CardDTO createCard(CardDTO cardDTO) {
+        Card card = CardMapper.INSTANCE.toEntity(cardDTO);
+        cardRepository.save(card);
+        return cardDTO;
+    }
+
+    public void deleteCard(Long cardId) {
+        cardRepository.deleteById(cardId);
     }
 }
