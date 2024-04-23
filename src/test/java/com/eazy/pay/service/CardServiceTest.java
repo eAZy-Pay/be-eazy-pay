@@ -43,7 +43,6 @@ class CardServiceTest {
                 .performance(300_000)
                 .benefitLimit(10_000)
                 .info("외식에 좋은 카드")
-                .applicationUrl("신청1")
                 .build();
 
         Card card2 = Card.builder()
@@ -54,7 +53,6 @@ class CardServiceTest {
                 .performance(0)
                 .benefitLimit(999_999_999)
                 .info("무실적 카드")
-                .applicationUrl("신청2")
                 .build();
 
         Category category1 = Category.builder()
@@ -143,7 +141,6 @@ class CardServiceTest {
                 .performance(0)
                 .benefitLimit(999_999_999)
                 .info("테스트 카드")
-                .applicationUrl("신청3")
                 .build();
 
         CardDTO createdCardDTO = cardService.createCard(cardDTO);
