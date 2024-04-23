@@ -12,23 +12,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class) // MockitoExtension을 사용하여 Mock 객체를 주입받을 수 있도록 설정
+@ExtendWith(MockitoExtension.class)
 class CardServiceTest {
 
-    @Mock // 가짜 객체(Mock)를 만들어 반환해주는 어노테이션
+    @Mock
     private CardRepository cardRepository;
 
-    @InjectMocks // Mock 객체를 주입받아 테스트 대상인 CardService를 만들어주는 어노테이션
+    @InjectMocks
     private CardService cardService;
 
-    @BeforeEach // 각 테스트가 실행되기 전에 실행되는 메서드
+    @BeforeEach
     void setUp() {
         Card card1 = Card.builder()
                 .uid(1L)
@@ -52,16 +57,6 @@ class CardServiceTest {
                 .applicationUrl("신청2")
                 .build();
 
-        List<Card> cardList = List.of(card1, card2);
-
-        // 사용하지 않는 stub이 있으며 UnnecessaryStubbingException 발생
-        // lenient() 메서드는 Mockito가 사용하지 않는 stub을 무시하도록 설정
-        // cardRepository.findAll() 메서드가 호출되면 cardList를 반환하도록 설정
-        lenient().when(cardRepository.findAll()).thenReturn(cardList);
-
-        // cardRepository.findByNameContaining("무실적") 메서드가 호출되면 card2를 반환하도록 설정
-        lenient().when(cardRepository.findByNameContaining("무실적")).thenReturn(List.of(card2));
-
         Category category1 = Category.builder()
                 .uid(1L)
                 .name("외식")
@@ -84,51 +79,50 @@ class CardServiceTest {
                 .benefitRate(2)
                 .build();
 
+        List<Card> cardList = Arrays.asList(card1, card2);
+
         List<CardBenefit> cardBenefitList = List.of(cardBenefit1, cardBenefit2);
 
         card2.setBenefitList(cardBenefitList);
 
+        // PageImpl을 사용하여 Page<Card> 객체 생성
+        PageRequest pageable = PageRequest.of(0, 10);
+        Page<Card> cardPage = new PageImpl<>(cardList, pageable, cardList.size());
+
+        // lenient() 메서드를 사용하여 Mock 객체의 메서드 호출을 유연하게 설정
+        lenient().when(cardRepository.findAll(pageable)).thenReturn(cardPage);
+        lenient().when(cardRepository.findByNameContaining("무실적", pageable)).thenReturn(new PageImpl<>(List.of(card2)));
         lenient().when(cardRepository.findByUid(2L)).thenReturn(Optional.of(card2));
-
     }
-
 
     @Test
     void getAllCards() {
-        // CardService의 getAllCards() 메서드를 실행 모든 카드 정보를 조회
-        List<CardDTO> cardList = cardService.getAllCards();
+        Pageable pageable = PageRequest.of(0, 10);
+        // CardService의 getAllCards() 메서드 실행
+        Page<CardDTO> cardPage = cardService.getAllCards(pageable);
 
-        // cardList에는 card1과 card2가 포함되어 있어야 함
-        assertEquals(2, cardList.size());
-        assertEquals("외식 카드", cardList.get(0).getName());
-        assertEquals("무실적 카드", cardList.get(1).getName());
+        assertEquals(2, cardPage.getTotalElements()); // 페이지의 총 항목 수 확인
+        assertEquals("외식 카드", cardPage.getContent().get(0).getName());
+        assertEquals("무실적 카드", cardPage.getContent().get(1).getName());
 
-        // cardRepository.findAll() 메서드가 1번 호출되었는지 확인
-        // verify() 메서드는 Mock 객체의 메서드가 호출되었는지 확인하는 메서드
-        // times() 메서드는 호출 횟수를 지정하는 메서드
-        verify(cardRepository, times(1)).findAll();
+        verify(cardRepository, times(1)).findAll(pageable);
     }
 
     @Test
     void getCardsLikeName() {
-        // CardService의 getCardsLikeName("무실적") 메서드를 실행 이름에 "무실적"이 포함된 카드 정보를 조회
-        List<CardDTO> cardList = cardService.getCardsLikeName("무실적");
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<CardDTO> cardPage = cardService.getCardsLikeName("무실적", pageable);
 
-        // cardList에는 card2가 포함되어 있어야 함
-        assertEquals(1, cardList.size());
-        assertEquals("무실적 카드", cardList.get(0).getName());
+        assertEquals(1, cardPage.getTotalElements());
+        assertEquals("무실적 카드", cardPage.getContent().get(0).getName());
 
-        // cardRepository.findByNameContaining("무실적") 메서드가 1번 호출되었는지 확인
-        verify(cardRepository, times(1)).findByNameContaining("무실적");
+        verify(cardRepository, times(1)).findByNameContaining("무실적", pageable);
     }
 
     @Test
     void getCardWithBenefitByCardId() {
-
-        // CardService의 getCardWithBenefitByCardId(2L) 메서드를 실행 카드 id가 2인 카드 정보를 조회
         CardWithBenefitDTO cardWithBenefitDTO = cardService.getCardWithBenefitByCardId(2L);
 
-        // cardWithBenefitDTO에는 card2와 card2의 혜택 정보가 포함되어 있어야 함
         assertEquals("무실적 카드", cardWithBenefitDTO.getCard().getName());
         assertEquals(2, cardWithBenefitDTO.getBenefitList().size());
         assertEquals("외식", cardWithBenefitDTO.getBenefitList().get(0).getCategoryName());
@@ -136,7 +130,34 @@ class CardServiceTest {
         assertEquals("차량", cardWithBenefitDTO.getBenefitList().get(1).getCategoryName());
         assertEquals(2, cardWithBenefitDTO.getBenefitList().get(1).getBenefitRate());
 
-        // cardRepository.findByUid(2L) 메서드가 1번 호출되었는지 확인
         verify(cardRepository, times(1)).findByUid(2L);
+    }
+
+    @Test
+    void createCard() {
+        CardDTO cardDTO = CardDTO.builder()
+                .uid(3L)
+                .image("image3")
+                .name("테스트 카드")
+                .annualFee(10_000)
+                .performance(0)
+                .benefitLimit(999_999_999)
+                .info("테스트 카드")
+                .applicationUrl("신청3")
+                .build();
+
+        CardDTO createdCardDTO = cardService.createCard(cardDTO);
+
+        assertEquals(cardDTO.getName(), createdCardDTO.getName());
+        assertEquals(cardDTO.getImage(), createdCardDTO.getImage());
+
+        verify(cardRepository, times(1)).save(any(Card.class));
+    }
+
+    @Test
+    void deleteCard() {
+        cardService.deleteCard(2L);
+
+        verify(cardRepository, times(1)).deleteById(2L);
     }
 }
