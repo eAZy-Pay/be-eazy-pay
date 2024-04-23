@@ -39,10 +39,4 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);  // save 메소드가 등록된 사용자 객체를 반환
     }
 
-    public User findByNameAndPhoneNumber(String name, String phoneNumber) {
-        return userRepository.findByNameAndPhoneNumber(name, phoneNumber)
-                .orElse(null);
-    }
-
-
 }

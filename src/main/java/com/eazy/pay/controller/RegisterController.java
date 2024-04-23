@@ -24,11 +24,8 @@ public class RegisterController {
     public ResponseEntity registerUser(@RequestBody User user) {
         try {
             User registeredUser = userService.registerUser(user);
-            // 등록에 성공하면 응답을 UserCard의 이름, 이미지로 변경할 예정
             Map<String, Object> response = new HashMap<>();
             response.put("name", registeredUser.getName());
-            response.put("email", registeredUser.getEmail());
-//            System.out.println(ResponseEntity.ok(response));
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             // 실패 시 적절한 HTTP 상태 코드와 메시지 반환
@@ -42,16 +39,6 @@ public class RegisterController {
             return ResponseEntity.ok("id available");
         } else {
             return ResponseEntity.status(409).body("id already exists");
-        }
-    }
-
-    @GetMapping(value = "/checkmember")
-    public ResponseEntity checkMember(@RequestParam("name") String name,
-                                      @RequestParam("phoneNumber") String phoneNumber) {
-        if (userService.findByNameAndPhoneNumber(name, phoneNumber) != null) {
-            return ResponseEntity.ok("member not exists");
-        } else {
-            return ResponseEntity.status(409).body("member exists");
         }
     }
 }
