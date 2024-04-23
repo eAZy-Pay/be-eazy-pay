@@ -37,7 +37,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping(value = "/api/shopping/checkpin")
+    @PostMapping(value = "/api/checkpin")
     public ResponseEntity order(@RequestBody UserPinDTO userPinDTO) {
         // findById로 User객체를 가져오기
         Optional<User> optionalUser = userRepository.findById(userPinDTO.getUid());
