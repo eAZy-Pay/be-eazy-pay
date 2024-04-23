@@ -2,11 +2,14 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dao.UserRepository;
 import com.eazy.pay.model.User;
+import com.eazy.pay.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -14,36 +17,28 @@ import java.util.Optional;
 public class RegisterController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
+
 
     @PostMapping
     public ResponseEntity registerUser(@RequestBody User user) {
         try {
-            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
-            User registerUser = userRepository.save(user);
-            return ResponseEntity.ok(registerUser);
+            User registeredUser = userService.registerUser(user);
+            Map<String, Object> response = new HashMap<>();
+            response.put("name", registeredUser.getName());
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("registration fail");
+            // 실패 시 적절한 HTTP 상태 코드와 메시지 반환
+            return ResponseEntity.status(500).body("Registration failed: " + e.getMessage());
         }
     }
 
     @GetMapping(value = "/checkid")
     public ResponseEntity checkId(@RequestParam("id") String strId) {
-        Optional<User> ou = this.userRepository.findByStrId(strId);
-        if (ou.isPresent()) {
-            return ResponseEntity.status(409).body("id already exists");
-        } else {
+        if (userService.getUserByStrId(strId) == null) {
             return ResponseEntity.ok("id available");
-        }
-    }
-
-    @GetMapping(value = "/checkmember")
-    public ResponseEntity checkMember(@RequestParam("name") String name, @RequestParam("phoneNumber") String phoneNumber) {
-        Optional<User> ou = this.userRepository.findByNameAndPhoneNumber(name, phoneNumber);
-        if (ou.isPresent()) {
-            return ResponseEntity.ok("member exists");
         } else {
-            return ResponseEntity.status(404).body("member not exists");
+            return ResponseEntity.status(409).body("id already exists");
         }
     }
 }
