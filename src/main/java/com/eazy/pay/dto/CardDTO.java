@@ -13,6 +13,7 @@ public class CardDTO {
     private String name;
     private Integer annualFee;
     private Integer benefitLimit;
+    private Integer performance;
     private String info;
     private String applicationUrl;
 }

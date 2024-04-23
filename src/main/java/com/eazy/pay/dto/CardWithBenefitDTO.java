@@ -10,13 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 public class CardWithBenefitDTO {
-    private Long uid;
-    private String image;
-    private String name;
-    private Integer annualFee;
-    private Integer performance;
-    private Integer benefitLimit;
-    private String info;
-    private String applicationUrl;
+    private CardDTO card;
     private List<CardBenefitDTO> benefitList;
 }

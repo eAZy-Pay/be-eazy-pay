@@ -1,6 +1,10 @@
 package com.eazy.pay.model;
+
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
@@ -12,11 +16,11 @@ import java.util.Date;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-public class UserCard extends BaseEntity {
+public class WooriCardUserCard extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "uid")
-    private User user;
+    private WooriCardUser wooriCardUser;
 
     @ManyToOne
     @JoinColumn(name = "card_id", referencedColumnName = "uid")
@@ -30,9 +34,6 @@ public class UserCard extends BaseEntity {
 
     @Column(name = "payment_limit")
     private int paymentLimit;
-
-    @Column(name = "link_eazy")
-    private boolean linkEazy;
 
     @Column(name = "card_valid")
     private boolean cardValid;
