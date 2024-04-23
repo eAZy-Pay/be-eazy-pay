@@ -1,17 +1,20 @@
 package com.eazy.pay.controller;
 
+import com.eazy.pay.dao.UserRepository;
 import com.eazy.pay.dto.SignInDTO;
+import com.eazy.pay.dto.UserPinDTO;
 import com.eazy.pay.model.User;
 import com.eazy.pay.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 public class AuthController {
@@ -19,6 +22,8 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping("/login")
     public SignInDTO getuser(@RequestParam("user_name") String strId, @RequestParam("user_password") String userPassword){
@@ -29,6 +34,23 @@ public class AuthController {
             return new SignInDTO(HttpStatus.OK, user.getUid(), user.getUsername(), user.getIsAdmin());
         } else {
             return new SignInDTO(HttpStatus.UNAUTHORIZED);
+        }
+    }
+
+    @PostMapping(value = "/api/shopping/checkpin")
+    public ResponseEntity order(@RequestBody UserPinDTO userPinDTO) {
+        // findById로 User객체를 가져오기
+        Optional<User> optionalUser = userRepository.findById(userPinDTO.getUid());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            // 가져온 User 객체의 pin과 userPinDTO의 pin이 일치하는지 확인
+            if (user.getPin().equals(userPinDTO.getPin())) {
+                return ResponseEntity.ok("Pin matches");  // HTTP 200 OK
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Pin does not match");  // HTTP 400 Bad Request
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");  // HTTP 404 Not Found
         }
     }
 
