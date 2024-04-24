@@ -26,4 +26,9 @@ public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory
             "AND uch.userCard.cardValid = true")
     List<UserCard> findFulfilledByUserIdAndDate(Long userId, Date start, Date end, Date now, Integer price);
 
+    @Query("SELECT uch FROM UserCardHistory uch " +
+            "WHERE uch.userCard.uid = ?1 " +
+            "AND MONTH(uch.yearAndMonth) = MONTH(?2) " +
+            "AND YEAR(uch.yearAndMonth) = YEAR(?2) ")
+    UserCardHistory findByUserCardIdAndDate(Long userCardId, Date date);
 }

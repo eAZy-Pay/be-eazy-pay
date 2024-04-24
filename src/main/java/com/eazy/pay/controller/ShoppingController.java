@@ -20,7 +20,7 @@ public class ShoppingController {
     PayService payService;
     @GetMapping
     public Object pay(@RequestParam(value = "user_id") Long userId, @RequestParam(value = "category_id") Long categoryId, @RequestParam(value = "price") Integer price){
-        CompletedPaymentDTO dto = (CompletedPaymentDTO) payService.pay(userId, categoryId, price);
+        Object dto = payService.pay(userId, categoryId, price, "storeCode", "storeName");
         if(dto.equals("NoAvailableCard")){
             return ResponseEntity.status(500).body("NoAvailableCard");
         }
@@ -29,10 +29,11 @@ public class ShoppingController {
 
     @PostMapping("/order")
     public ResponseEntity payrequest(@RequestBody Long userId, @RequestBody Long categoryId, @RequestBody Integer price){
-        CompletedPaymentDTO dto = (CompletedPaymentDTO) payService.pay(userId, categoryId, price);
+       /* //CompletedPaymentDTO dto = (CompletedPaymentDTO) payService.pay(userId, categoryId, price);
         if(dto.equals("NoAvailableCard")){
             return ResponseEntity.status(500).body("NoAvailableCard");
-        }
-        return ResponseEntity.ok(dto);
+        }*/
+        //return ResponseEntity.ok(dto);
+        return ResponseEntity.ok("test");
     }
 }
