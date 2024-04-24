@@ -1,6 +1,7 @@
 package com.eazy.pay.controller;
 
 import com.eazy.pay.dao.UserRepository;
+import com.eazy.pay.dto.CompletedPaymentDTO;
 import com.eazy.pay.dto.UserPinDTO;
 import com.eazy.pay.model.User;
 import com.eazy.pay.service.PayService;
@@ -18,10 +19,20 @@ public class ShoppingController {
     @Autowired
     PayService payService;
     @GetMapping
-    public Object pay(@RequestParam(value = "user_id") Long userId){
-       /* if(payService.pay(userId)) {
-            return ResponseEntity.ok().build();
-        }*/
-        return payService.pay(userId);
+    public Object pay(@RequestParam(value = "user_id") Long userId, @RequestParam(value = "category_id") Long categoryId, @RequestParam(value = "price") Integer price){
+        CompletedPaymentDTO dto = (CompletedPaymentDTO) payService.pay(userId, categoryId, price);
+        if(dto.equals("NoAvailableCard")){
+            return ResponseEntity.status(500).body("NoAvailableCard");
+        }
+        return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/order")
+    public ResponseEntity payrequest(@RequestBody Long userId, @RequestBody Long categoryId, @RequestBody Integer price){
+        CompletedPaymentDTO dto = (CompletedPaymentDTO) payService.pay(userId, categoryId, price);
+        if(dto.equals("NoAvailableCard")){
+            return ResponseEntity.status(500).body("NoAvailableCard");
+        }
+        return ResponseEntity.ok(dto);
     }
 }
