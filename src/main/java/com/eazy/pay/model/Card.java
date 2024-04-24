@@ -38,7 +38,7 @@ public class Card extends BaseEntity {
     private String info;
 
     private Integer performance;
-
+    
     @JsonManagedReference
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY) // 지연로딩: 필요할 때만 데이터를 가져온다.
     private List<CardBenefit> benefitList;
