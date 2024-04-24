@@ -6,7 +6,6 @@ import com.eazy.pay.model.PaymentHistory;
 import com.eazy.pay.dao.PaymentHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -60,6 +59,5 @@ public class PaymentHistoryService {
         return paymentHistoryRepository.findAll();
     }
 
-    public List<PaymentHistory> getPayBenefitsForNMonthByCardNum(String num, int month){ return paymentHistoryRepository.findByCardNumAndDateWithinDate(num, Timestamp.valueOf(LocalDate.now().minusMonths(month).atStartOfDay())).orElse(null);}
 
 }
