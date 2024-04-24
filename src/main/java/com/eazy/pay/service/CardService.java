@@ -50,4 +50,16 @@ public class CardService {
     public void deleteCard(Long cardId) {
         cardRepository.deleteById(cardId);
     }
+
+    public CardDTO updateCard(Long cardId, CardDTO cardDTO) {
+        Card card = cardRepository.findByUid(cardId).orElseThrow(() -> new IllegalArgumentException("수정할 카드가 없습니다."));
+        
+        card.setName(cardDTO.getName());
+        card.setAnnualFee(cardDTO.getAnnualFee());
+        card.setPerformance(cardDTO.getPerformance());
+        card.setBenefitLimit(cardDTO.getBenefitLimit());
+        card.setInfo(cardDTO.getInfo());
+        cardRepository.save(card);
+        return cardDTO;
+    }
 }

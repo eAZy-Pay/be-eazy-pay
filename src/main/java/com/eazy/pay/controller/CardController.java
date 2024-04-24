@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -57,8 +58,18 @@ public class CardController {
     }
 
     @DeleteMapping("/{cardId}")
-    public void deleteCard(@PathVariable("cardId") Long cardId) {
-        cardService.deleteCard(cardId);
+    public ResponseEntity<String> deleteCard(@PathVariable("cardId") Long cardId) {
+        try {
+            cardService.deleteCard(cardId);
+            return ResponseEntity.ok("카드가 성공적으로 삭제되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("삭제할 카드가 없습니다.");
+        }
+    }
+
+    @PatchMapping("/{cardId}")
+    public CardDTO updateCard(@PathVariable("cardId") Long cardId, @RequestBody CardDTO cardDTO) {
+        return cardService.updateCard(cardId, cardDTO);
     }
 
 }
