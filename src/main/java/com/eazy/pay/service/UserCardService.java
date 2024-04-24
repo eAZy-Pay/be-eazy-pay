@@ -4,6 +4,8 @@ import com.eazy.pay.dao.PaymentHistoryRepository;
 import com.eazy.pay.dto.BenefitAndSimpleUserCardsDTO;
 import com.eazy.pay.dto.PaymentHistoryDTO;
 import com.eazy.pay.dto.SimpleUserCardDTO;
+import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.mapper.UserCardMapper;
 import com.eazy.pay.model.Card;
 import com.eazy.pay.model.PaymentHistory;
 import com.eazy.pay.model.UserCard;
@@ -141,4 +143,18 @@ public class UserCardService {
                     return card.getPerformance() - dto.getUseAmount();
                 }));
     }
+
+    public void createUserCard(UserCardDTO userCardDTO) {
+        UserCard userCard = UserCardMapper.INSTANCE.toEntity(userCardDTO);
+        userCardRepository.save(userCard); // 저장
+    }
+
+    public void disableUserCard(Long userCardId) {
+        UserCard userCard = userCardRepository.findById(userCardId).orElseThrow(() ->
+                new IllegalArgumentException("유효하지 않은 카드 ID입니다.")
+        );
+        userCard.setCardValid(false);
+        userCardRepository.save(userCard);
+    }
+
 }
