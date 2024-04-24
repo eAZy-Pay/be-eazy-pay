@@ -29,12 +29,10 @@ public class PaymentHistory extends BaseEntity {
     @Column(name = "store_name")
     private String storeName;
 
-
     @Column(name = "category_name")
     private String categoryName;
 
     @Column(name = "benefit_amount")
     private int benefitAmount;
-
 
 }
