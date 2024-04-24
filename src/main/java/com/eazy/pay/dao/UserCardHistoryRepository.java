@@ -24,7 +24,7 @@ public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory
             "     AND YEAR(subUch.yearAndMonth) = YEAR(?4)" +
             ")" +
             "AND uch.userCard.cardValid = true")
-    List<UserCard> findFulfilledByUserIdAndDate(Long userId, Date start, Date end, Date now, Integer price);
+    List<UserCard> findFulfilledByUserIdAndDate(Long userId, Date start, Date end, Date now, Integer price); //전월 카드 실적 확인, 이번달 한도 확인
 
     @Query("SELECT uch FROM UserCardHistory uch " +
             "WHERE uch.userCard.uid = ?1 " +
