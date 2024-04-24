@@ -157,4 +157,27 @@ class CardServiceTest {
 
         verify(cardRepository, times(1)).deleteById(2L);
     }
+
+    @Test
+    void updateCard() {
+        CardDTO cardDTO = CardDTO.builder()
+                .uid(2L)
+                .image("image2")
+                .name("무실적 카드 수정")
+                .annualFee(10_000)
+                .performance(0)
+                .benefitLimit(999_999_999)
+                .info("무실적 카드 수정")
+                .build();
+
+        CardDTO updatedCardDTO = cardService.updateCard(2L, cardDTO);
+
+        assertEquals(cardDTO.getUid(), updatedCardDTO.getUid());
+        assertEquals(cardDTO.getName(), updatedCardDTO.getName());
+        assertEquals(cardDTO.getImage(), updatedCardDTO.getImage());
+
+        verify(cardRepository, times(1)).save(any(Card.class));
+
+    }
+
 }
