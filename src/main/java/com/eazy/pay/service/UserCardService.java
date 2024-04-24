@@ -34,53 +34,49 @@ public class UserCardService {
 
     // UserId로 자신의 보유 카드 모두가져오기
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserId(userId);}
-    // 자신의 보유 카드 4개까지만 가져오기
-    public List<UserCard> getUserCardsByUserIdWithLimit4(Long userId){return  userCardRepository.findByUserIdLimit4(userId);}
 
 
-    public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId) {
+
+    public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId, int month) {
         List<UserCard> userCards = userCardRepository.findByUserId(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
         int totalBenefitAmount = 0; // 모든 카드들의 3개월간 혜택
 
         List<SimpleUserCardDTO> cards = new ArrayList<>(); //리턴할 DTO에 넣어줄 보유카드의 상품+사용 정보
         List<SimpleUserCardDTO> beforeSort = new ArrayList<>(); //모든 보유카드의 계산된 사용 정보에 따라 정렬하기 전 임시 리스트
 
-        for (UserCard uc : userCards){
-            int benefitAmount3 = 0; // 3개월간 혜택
-            Card card = uc.getCard(); //카드 상품 정보 가져오기
+        // 날짜 계산
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = now.minusMonths(month - 1).withDayOfMonth(1); // 설정된 month에 따라 시작일을 계산
+        LocalDate endDate = now; // 오늘 날짜로 종료일을 설정
+        
+
+        for (UserCard uc : userCards) {
+            Card card = uc.getCard();
             String cardNum = uc.getNum();
 
-            //해당 보유 카드의 최근3개월 모든 거래내역
-            List<PaymentHistory> payBenefitsFor3 =
-                    paymentHistoryRepository.findByCardNumAndDateWithinDate(cardNum,
-                            Timestamp.valueOf(LocalDate.now().minusMonths(3).atStartOfDay())
-                    ).orElse(null);
-            if (payBenefitsFor3 != null){
-                for (PaymentHistory pb : payBenefitsFor3) {
-                benefitAmount3 += pb.getBenefitAmount();
-                }
-            }
-
-            totalBenefitAmount += benefitAmount3;
-
-            int benefitAmount1 = 0; // 이번 달 혜택
-            int useAmount = 0; // 이번 달 사용액
-            //해당 보유 카드의 최근 1개월 모든 거래 내역
-            List<PaymentHistory> payBenefitsFor1 =
-                    paymentHistoryRepository.findByCardNumAndDateWithinDate(cardNum,
-                            Timestamp.valueOf(LocalDate.now().minusMonths(1).atStartOfDay())
+            // 해당 카드의 특정 월 기간 내 모든 거래내역 가져오기
+            List<PaymentHistory> payBenefitsForMonth =
+                    paymentHistoryRepository.findByCardNumAndDateWithinDate(
+                            cardNum,
+                            Timestamp.valueOf(startDate.atStartOfDay()), // 시작 날짜를 Timestamp로 변환
+                            Timestamp.valueOf(endDate.plusDays(1).atStartOfDay()) // 종료 날짜에 1일 더해 포함되게 처리
                     ).orElse(null);
 
-            if (payBenefitsFor1 != null){ // 거래내역이 아예 없으면 게산하지 않음
-                for (PaymentHistory pb : payBenefitsFor1) {
-                    benefitAmount1 += pb.getBenefitAmount();
+            int benefitAmount = 0;
+            int useAmount = 0;
+
+            if (payBenefitsForMonth != null) {
+                for (PaymentHistory pb : payBenefitsForMonth) {
+                    benefitAmount += pb.getBenefitAmount();
                     useAmount += pb.getPaymentAmount();
                 }
             }
 
+            totalBenefitAmount += benefitAmount; // 총 혜택 금액 누적
+
             SimpleUserCardDTO userCard = SimpleUserCardDTO.builder()
                             .card(card)
-                            .benefitAmount(benefitAmount1)
+                            .benefitAmount(benefitAmount)
                             .useAmount(useAmount)
                             .build();
 
