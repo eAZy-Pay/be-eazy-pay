@@ -10,10 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class PayService {
@@ -100,7 +98,6 @@ public class PayService {
                     .cardName(card.getName())
                     .build();
         }
-
         return "NoAvailableCard";
     }
 
@@ -117,12 +114,15 @@ public class PayService {
         //무실적이거나, 전월 실적 채운 이번 결제 유효한 카드
         List<UserCard> fulfilledUserCardList = new ArrayList<>();
         fulfilledUserCardList = userCardHistoryRepository.findFulfilledByUserIdAndDate(userId, start, end, java.sql.Date.valueOf(LocalDate.now()), price);
-        if(fulfilledUserCardList == null){//실적 채운 카드가 없을 때
+        if(fulfilledUserCardList.size() == 0){//실적 채운 카드가 없을 때
             List<UserCard> uc = userCardRepository.findByUserId(userId);
+            if(uc == null){return null;}//
             //실적이 얼마 남지 않은 카드 순서로 정렬 TODO:
             uc.sort((uc1, uc2) -> {
                 UserCardHistory history1 = userCardHistoryRepository.findByUserCardIdAndDate(uc1.getUid(), java.sql.Date.valueOf(LocalDate.now()));
+                //System.out.println(history1);
                 UserCardHistory history2 = userCardHistoryRepository.findByUserCardIdAndDate(uc2.getUid(), java.sql.Date.valueOf(LocalDate.now()));
+                //System.out.println(history2); 직렬화 순환참조 에러
 
                 // 채워야 할 실적
                 int remaining1 = uc1.getCard().getPerformance() - (history1 != null ? history1.getUseAmount() : 0);
