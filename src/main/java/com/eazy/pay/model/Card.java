@@ -39,8 +39,6 @@ public class Card extends BaseEntity {
 
     private Integer performance;
 
-    @Column(name = "application_url")
-    private String applicationUrl;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "card", fetch = FetchType.LAZY) // 지연로딩: 필요할 때만 데이터를 가져온다.
