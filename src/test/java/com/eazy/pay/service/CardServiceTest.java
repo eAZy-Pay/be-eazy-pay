@@ -1,11 +1,10 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.CardRepository;
+import com.eazy.pay.dao.HighlightedCardRepository;
 import com.eazy.pay.dto.CardDTO;
 import com.eazy.pay.dto.CardWithBenefitDTO;
-import com.eazy.pay.model.Card;
-import com.eazy.pay.model.CardBenefit;
-import com.eazy.pay.model.Category;
+import com.eazy.pay.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +28,9 @@ class CardServiceTest {
 
     @Mock
     private CardRepository cardRepository;
+
+    @Mock
+    private HighlightedCardRepository highlightedCardRepository;
 
     @InjectMocks
     private CardService cardService;
@@ -77,9 +79,31 @@ class CardServiceTest {
                 .benefitRate(2)
                 .build();
 
+        EventCategory eventCategory = EventCategory.builder()
+                .uid(1L)
+                .name("이벤트 카테고리")
+                .build();
+
+        HighlightedCard highlightedCard1 = HighlightedCard.builder()
+                .uid(1L)
+                .card(card1)
+                .eventCategory(eventCategory)
+                .displayOrder(2)
+                .build();
+
+        HighlightedCard highlightedCard2 = HighlightedCard.builder()
+                .uid(2L)
+                .card(card2)
+                .eventCategory(eventCategory)
+                .displayOrder(1)
+                .build();
+
+
         List<Card> cardList = Arrays.asList(card1, card2);
 
         List<CardBenefit> cardBenefitList = List.of(cardBenefit1, cardBenefit2);
+
+        List<HighlightedCard> highlightedCardList = List.of(highlightedCard1, highlightedCard2);
 
         card2.setBenefitList(cardBenefitList);
 
@@ -91,6 +115,7 @@ class CardServiceTest {
         lenient().when(cardRepository.findAll(pageable)).thenReturn(cardPage);
         lenient().when(cardRepository.findByNameContaining("무실적", pageable)).thenReturn(new PageImpl<>(List.of(card2)));
         lenient().when(cardRepository.findByUid(2L)).thenReturn(Optional.of(card2));
+        lenient().when(highlightedCardRepository.findByEventCategoryUid(1L)).thenReturn(highlightedCardList);
     }
 
     @Test
@@ -177,7 +202,18 @@ class CardServiceTest {
         assertEquals(cardDTO.getImage(), updatedCardDTO.getImage());
 
         verify(cardRepository, times(1)).save(any(Card.class));
+    }
 
+    @Test
+    void getHighlightedCards() {
+        List<CardDTO> highlightedCards = cardService.getHighlightedCards(1L);
+
+        // displayOrder 순서대로 정렬되어야 함
+        assertEquals(2, highlightedCards.size());
+        assertEquals("무실적 카드", highlightedCards.get(1).getName());
+        assertEquals("외식 카드", highlightedCards.get(0).getName());
+
+        verify(highlightedCardRepository, times(1)).findByEventCategoryUid(1L);
     }
 
 }
