@@ -19,14 +19,6 @@ import java.util.Optional;
 public class ShoppingController {
     @Autowired
     PayService payService;
-    @GetMapping
-    public Object pay(@RequestParam(value = "user_id") Long userId, @RequestParam(value = "category_id") Long categoryId, @RequestParam(value = "price") Integer price){
-        Object dto = payService.pay(userId, categoryId, price, "storeCode", "storeName");
-        if(dto.equals("NoAvailableCard")){
-            return ResponseEntity.status(500).body("NoAvailableCard");
-        }
-        return ResponseEntity.ok(dto);
-    }
 
     @PostMapping("/order")
     public ResponseEntity payrequest(@RequestBody PayRequestDTO dto){

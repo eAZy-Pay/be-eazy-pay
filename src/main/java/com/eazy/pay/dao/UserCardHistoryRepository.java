@@ -19,7 +19,7 @@ public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory
             "AND uch.is_fulfilled = true "+
             "AND uch.userCard.paymentLimit >="+
             "(" +
-            "SELECT MIN(subUch.useAmount + ?5) FROM UserCardHistory subUch " +
+            "SELECT COALESCE(MIN(subUch.useAmount + ?5), 0) FROM UserCardHistory subUch " + //coalesce: null이면 0으로 대체
             "     WHERE MONTH(subUch.yearAndMonth) = MONTH(?4) " +
             "     AND YEAR(subUch.yearAndMonth) = YEAR(?4)" +
             ")" +

@@ -25,9 +25,13 @@ public class PayService {
     CategoryRepository categoryRepository;
 
     public Object pay(Long userId, Long categoryId, Integer price, String storeCode, String storeName){
+        // 결제에 사용할 카드 선택
         UserCard selectedCard = selectCardToPay(userId, categoryId, price);
+
         if(selectedCard != null){
             Card card = selectedCard.getCard();
+
+            //카드에 대해 월별로 계산된 정보
             UserCardHistory history = userCardHistoryRepository.findByUserCardIdAndDate(selectedCard.getUid(), Date.valueOf(LocalDate.now().minusMonths(1).withDayOfMonth(1)));
             UserCardHistory thisMonthHistory = userCardHistoryRepository.findByUserCardIdAndDate(selectedCard.getUid(), Date.valueOf(LocalDate.now()));
 
@@ -59,6 +63,8 @@ public class PayService {
             Category category = categoryRepository.findById(categoryId).orElse(null);
             if(category != null){
                 categoryName = category.getName();
+            }else{
+                return "NoAvailableCard";
             }
 
             //------------------------------------------결제 내역 저장--------------------------------------------------
@@ -73,21 +79,21 @@ public class PayService {
                     .build());
 
             if(thisMonthHistory != null){ // 이미 저장된 내역이 있을 경우 UserCardHistory 업데이트
+                System.out.println(selectedCard.getUid());
                 thisMonthHistory.setUseAmount(thisMonthHistory.getUseAmount() + price);
                 thisMonthHistory.setBenefitAmount(thisMonthHistory.getBenefitAmount() + discount);
                 thisMonthHistory.setIs_fulfilled(card.getPerformance() <= thisMonthHistory.getUseAmount() + paymentAmount ? true : false); //이번 결제로 실적 완성?
                 userCardHistoryRepository.save(thisMonthHistory);
 
-            }else{// 이미 저장된 내역이 없을 경우 UserCardHistory ROW 생성
-                UserCardHistory uh = UserCardHistory.builder()
+            }else{// 이미 저장된 내역이 없을 경우 UserCardHistory 생성
+                UserCardHistory uch = UserCardHistory.builder()
                         .userCard(selectedCard)
-                        //.yearAndMonth(Date.valueOf(LocalDate.now().withDayOfMonth(1)))
-                        .yearAndMonth(java.sql.Date.valueOf(LocalDate.now().withDayOfMonth(1)))
+                        .yearAndMonth(java.sql.Date.valueOf(LocalDate.now().withDayOfMonth(1))) //Date에 sql저장하면 날짜 정확하지 않은 문제 있어서 엔티티 필드를 sql.Date로 변경함.
                         .benefitAmount(discount)
                         .useAmount(price)
                         .is_fulfilled(card.getPerformance() <= price ? true : false)
                         .build();
-                userCardHistoryRepository.save(uh);
+                userCardHistoryRepository.save(uch);
             }
 
             // 결제 완료 정보 응답
@@ -115,20 +121,11 @@ public class PayService {
         //무실적이거나, "전월" 실적 채운 이번 결제 유효한 카드
         List<UserCard> fulfilledUserCardList = new ArrayList<>();
         fulfilledUserCardList = userCardHistoryRepository.findFulfilledByUserIdAndDate(userId, start, end, java.sql.Date.valueOf(LocalDate.now()), price);
-        if(fulfilledUserCardList.size() == 0){// 전월실적 채운 카드가 없을 때 (할인 되는 카드 x)
-            List<UserCard> cardWithoutDiscountList = userCardRepository.findByUserId(userId);
-            cardWithoutDiscountList.sort((uc1, uc2) -> {
-                UserCardHistory history1 = userCardHistoryRepository.findByUserCardIdAndDate(uc1.getUid(), java.sql.Date.valueOf(LocalDate.now()));
-                UserCardHistory history2 = userCardHistoryRepository.findByUserCardIdAndDate(uc2.getUid(), java.sql.Date.valueOf(LocalDate.now()));
 
-                // 채워야 할 실적
-                int remaining1 = uc1.getCard().getPerformance() - (history1 != null ? history1.getUseAmount() : 0);
-                int remaining2 = uc2.getCard().getPerformance() - (history2 != null ? history2.getUseAmount() : 0);
+        if (fulfilledUserCardList.size() == 0) {// 전월실적 채운 카드가 없을 때 (할인 되는 카드 x)
 
-                return Integer.compare(remaining1, remaining2); // 오름차순-(채워야 할 실적이 작은 것 부터)
-            });
-
-            return cardWithoutDiscountList.get(0); // 채워야 할 실적이 가장 작은 카드 반환
+            List<UserCard> cardWithoutDiscountList = sortByRemainingPerformance(userId);
+            return cardWithoutDiscountList.size() != 0 ? cardWithoutDiscountList.get(0) : null; // 채워야 할 실적이 가장 작은 카드 반환
         }
 
         //실적을 채워 할인 가능한 카드가 있다면
@@ -147,30 +144,48 @@ public class PayService {
             }
         }
 
+        if(HavingBenefit.size()==0){ //실적채운 카드는 있지만 해당 카테고리의 할인 혜택이 없을 때
+            List<UserCard> cardWithoutDiscountList = sortByRemainingPerformance(userId);
+            return cardWithoutDiscountList.size() !=0 ? cardWithoutDiscountList.get(0) : null; // 채워야 할 실적이 가장 작은 카드 반환
+        }
+
         //혜택 한도를 고려한 할인 금액이 가장 큰 카드 순서대로 정렬
         List<UserCard> OrderByBenefit = new ArrayList<>(HavingBenefit.keySet());
         OrderByBenefit = sortByRemainingBenefit(OrderByBenefit, price, categoryId);
 
 
         for(UserCard uc : OrderByBenefit){
-            // 예외처리 클라이언트로 전달하고 싶을 때 findFulfilledByUserIdAndDate쿼리 및 아래 부분 수정
-            // (예 : 카드 한도 초과로 결제 불가능할 때, 카드 유효기간 만료로 결제 불가능할 때 등)
+            // 예외처리 추가할 때 : 클라이언트로 전달하고 싶을 때 findFulfilledByUserIdAndDate쿼리 및 아래 부분 수정하면 됩니다.
+            // (예 : 카드 한도 초과로 결제 불가능할 때, 카드 유효기간 만료로 결제 불가능할 때 등... -> 상태코드나 메시지를 클라이언트로 전달)
             if(uc.getExpirationDate().before(new java.util.Date())){continue;}
             return uc;
         }
         return null; //결제 가능한 카드가 없습니다.
     }
 
-    public List<UserCard> sortByRemainingBenefit(List<UserCard> orderByBenefit, Integer price, Long categoryId) {
-        //2.
-        /*
-         * 남은 받을 수 있는 혜택금액 < 할인 금액 : 할인한도 초과할 수 없음 = 최대로 할인받지 못하는 경우일 수 있음
-         * 남은 받을 수 있는 햬택 금액 > 할인 금액 : 일단 할인 금엑 다 할인 받을 수 있음
-         *
-         * *** 받을수 있는 혜택 금액 - 할인 금액 순서로 정렬 ***
-         * 받을 수 있는 혜택 금액 = benefitAmount - useAmount
-         * */
+    //남은 실적에 따른 우선순위 정렬
+    private List<UserCard> sortByRemainingPerformance(Long userId) {
+        List<UserCard> cardList = userCardRepository.findByUserId(userId);
+        cardList.sort((uc1, uc2) -> {
+            UserCardHistory history1 = userCardHistoryRepository.findByUserCardIdAndDate(uc1.getUid(), java.sql.Date.valueOf(LocalDate.now()));
+            UserCardHistory history2 = userCardHistoryRepository.findByUserCardIdAndDate(uc2.getUid(), java.sql.Date.valueOf(LocalDate.now()));
 
+            // 채워야 할 실적
+            int remaining1 = uc1.getCard().getPerformance() - (history1 != null ? history1.getUseAmount() : 0);
+            int remaining2 = uc2.getCard().getPerformance() - (history2 != null ? history2.getUseAmount() : 0);
+
+            return Integer.compare(remaining1, remaining2); // 오름차순-(채워야 할 실적이 작은 것 부터)
+        });
+
+        return cardList;
+    }
+
+    // 받을 수 있는 혜택금액에 따른 우선순위 정렬
+    private List<UserCard> sortByRemainingBenefit(List<UserCard> orderByBenefit, Integer price, Long categoryId) {
+         /*
+         *** (받을수 있는 혜택 금액 - 할인 금액) 순서로 정렬 ***
+         * 받을 수 있는 혜택 금액 = (benefitAmount - useAmount)
+         * */
 
         orderByBenefit.sort((uc1, uc2) -> {
             //카드 1의 할인 금액
