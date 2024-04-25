@@ -12,10 +12,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,10 +56,14 @@ class UserCardServiceTest {
                 .num("1234567890123456")
                 .expirationDate(expirationDate)
                 .paymentLimit(1_000_000)
+                .cardValid(true)
                 .build();
+
+        List<UserCard> user1Cards = List.of(user1Card1);
 
         lenient().when(userCardRepository.save(any(UserCard.class))).thenReturn(user1Card1);
         lenient().when(userCardRepository.findById(1L)).thenReturn(Optional.of(user1Card1));
+        lenient().when(userCardRepository.findByUserUid(1L , PageRequest.of(0, 100))).thenReturn(user1Cards);
     }
 
     @Test
@@ -97,6 +105,14 @@ class UserCardServiceTest {
         UserCard savedUserCard = userCardCaptor.getValue();
         // cardValid가 false로 변경되었는지 확인
         assertFalse(savedUserCard.isCardValid());
+    }
+
+    @Test
+    void testCheckUserCard() {
+        Long userId = 1L;
+        Long cardId = 1L;
+
+        assertTrue(userCardService.checkUserCard(userId, cardId));
     }
 
 }
