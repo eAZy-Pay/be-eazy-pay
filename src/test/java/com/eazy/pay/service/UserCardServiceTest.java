@@ -63,7 +63,7 @@ class UserCardServiceTest {
 
         lenient().when(userCardRepository.save(any(UserCard.class))).thenReturn(user1Card1);
         lenient().when(userCardRepository.findById(1L)).thenReturn(Optional.of(user1Card1));
-        lenient().when(userCardRepository.findByUserUid(1L , PageRequest.of(0, 100))).thenReturn(user1Cards);
+        lenient().when(userCardRepository.findByUserUid(1L)).thenReturn(user1Cards);
     }
 
     @Test
