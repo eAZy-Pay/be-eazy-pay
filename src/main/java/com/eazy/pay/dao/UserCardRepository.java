@@ -16,11 +16,7 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
 
     Optional<UserCard> findByUid(Long uid);
 
-    @Query("SELECT uc FROM UserCard uc WHERE uc.user.uid =?1")
-    List<UserCard> findByUserId(Long userId);
-
-    @Query("SELECT uc FROM UserCard uc WHERE uc.user.uid =?1 ORDER BY uc.uid limit 4")
-    List<UserCard> findByUserIdLimit4(Long userId);
+    List<UserCard> findByUserUid(Long userUid, Pageable pageable);
 
     // PaymentHistory 정보 조회
     @Query("SELECT new com.eazy.pay.dto.PaymentHistoryDTO(pb.paymentDate, pb.paymentAmount, pb.storeName) " +
@@ -38,4 +34,5 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
             Pageable pageable
     );
 
+    boolean existsByNum(String num);
 }

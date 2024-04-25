@@ -11,12 +11,14 @@ import com.eazy.pay.model.PaymentHistory;
 import com.eazy.pay.model.UserCard;
 import com.eazy.pay.dao.UserCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -33,13 +35,13 @@ public class UserCardService {
     }
 
     // UserId로 자신의 보유 카드 모두가져오기
-    public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserId(userId);}
+    public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId, PageRequest.of(0, 100));}
     // 자신의 보유 카드 4개까지만 가져오기
-    public List<UserCard> getUserCardsByUserIdWithLimit4(Long userId){return  userCardRepository.findByUserIdLimit4(userId);}
+    public List<UserCard> getUserCardsByUserIdWithLimit4(Long userId){return  userCardRepository.findByUserUid(userId, PageRequest.of(0, 4));}
 
 
     public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId) {
-        List<UserCard> userCards = userCardRepository.findByUserId(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
+        List<UserCard> userCards = userCardRepository.findByUserUid(userId, PageRequest.of(0, 100)); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
         int totalBenefitAmount = 0; // 모든 카드들의 3개월간 혜택
 
         List<SimpleUserCardDTO> cards = new ArrayList<>(); //리턴할 DTO에 넣어줄 보유카드의 상품+사용 정보
@@ -145,6 +147,36 @@ public class UserCardService {
     }
 
     public void createUserCard(UserCardDTO userCardDTO) {
+
+        // 사용자 ID와 카드 ID가 없을 경우 예외 발생
+        if (userCardDTO.getUserId() == null || userCardDTO.getCardId() == null) {
+            throw new IllegalArgumentException("사용자 ID와 카드 ID는 필수 입력값입니다.");
+        }
+        // 카드 만료일이 없을 경우 5년 뒤로 설정
+        if (userCardDTO.getExpirationDate() == null) {
+            Date expirationDate = new Date();
+            expirationDate.setYear(expirationDate.getYear() + 5);
+            userCardDTO.setExpirationDate(expirationDate);
+        }
+        // 카드번호 값이 없을 경우 랜덤 값으로 설정
+        if (userCardDTO.getNum() == null) {
+            long randomNumber = (long)(Math.random() * 10_000_000_000_000_000L); // 0 ~ 9999999999999999 사이의 랜덤 숫자 생성
+            String formattedNumber = String.format("%016d", randomNumber); // 16자리로 포맷팅
+            // 이미 존재하는 카드번호인지 확인
+            while (userCardRepository.existsByNum(formattedNumber)) {
+                randomNumber = (long)(Math.random() * 10_000_000_000_000_000L);
+                formattedNumber = String.format("%016d", randomNumber);
+            }
+            userCardDTO.setNum(formattedNumber);
+        }
+        // 결제 한도 값이 없을 경우 300만원으로 설정
+        if (userCardDTO.getPaymentLimit() <= 0) {
+            userCardDTO.setPaymentLimit(3_000_000);
+        }
+        // 카드 활성화 여부와 eAZy 카드와 연결 여부를 true로 설정
+        userCardDTO.setCardValid(true);
+        userCardDTO.setLinkEazy(true);
+
         UserCard userCard = UserCardMapper.INSTANCE.toEntity(userCardDTO);
         userCardRepository.save(userCard); // 저장
     }
@@ -155,6 +187,11 @@ public class UserCardService {
         );
         userCard.setCardValid(false);
         userCardRepository.save(userCard);
+    }
+
+    public boolean checkUserCard(Long userId, Long cardId) {
+        return userCardRepository.findByUserUid(userId, PageRequest.of(0, 100)).stream()
+                .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
     }
 
 }

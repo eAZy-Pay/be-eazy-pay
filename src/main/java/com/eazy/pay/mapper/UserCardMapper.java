@@ -16,8 +16,6 @@ public interface UserCardMapper {
     @Mapping(target = "num", source = "num")
     @Mapping(target = "expirationDate", source = "expirationDate")
     @Mapping(target = "paymentLimit", source = "paymentLimit")
-    @Mapping(target = "linkEazy", source = "linkEazy")
-    @Mapping(target = "cardValid", source = "cardValid")
     UserCardDTO toDTO(UserCard entity);
 
     @Mapping(target = "uid", source = "uid")
@@ -26,6 +24,5 @@ public interface UserCardMapper {
     @Mapping(target = "num", source = "num")
     @Mapping(target = "expirationDate", source = "expirationDate")
     @Mapping(target = "paymentLimit", source = "paymentLimit")
-    @Mapping(target = "linkEazy", source = "linkEazy")
     UserCard toEntity(UserCardDTO dto);
 }
