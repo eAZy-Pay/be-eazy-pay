@@ -3,6 +3,7 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.MonthlyFor6ResponseDTO;
 import com.eazy.pay.dto.PaymentHistoryDTO;
+import com.eazy.pay.dto.PaymentStatsDTO;
 import com.eazy.pay.service.MonthlyFor6Service;
 import com.eazy.pay.service.PaymentHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,22 +38,13 @@ public class PaymentHistoryController {
         return ResponseEntity.ok(paymentHistoryPage.getContent());
     }
 
-    @GetMapping("/total")
-    public ResponseEntity<Integer> getPaymentHistoryForMonth(
+    @GetMapping("/count-and-amount")
+    public PaymentStatsDTO getPaymentHistoryAndAmount(
+            @RequestParam("user_id") Long userId,
             @RequestParam("year") int year,
             @RequestParam("month") int month
     ) {
-        int totalTransactions = paymentHistoryService.getPaymentHistoryForMonth(year, month);
-        return ResponseEntity.ok(totalTransactions);
-    }
-
-    @GetMapping("/total-amount")
-    public ResponseEntity<Integer> getTotalAmountForMonth(
-            @RequestParam("year") int year,
-            @RequestParam("month") int month
-    ) {
-        int totalAmount = paymentHistoryService.getTotalAmountForMonth(year, month);
-        return ResponseEntity.ok(totalAmount);
+        return paymentHistoryService.getPaymentHistoryAndAmountForMonth(userId, year, month);
     }
 
     @GetMapping("/monthly-for-6")

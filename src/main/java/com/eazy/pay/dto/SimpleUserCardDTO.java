@@ -12,4 +12,5 @@ public class SimpleUserCardDTO {
     private Card card;
     private int benefitAmount;
     private int useAmount;
+    private int paymentLimit;
 }
