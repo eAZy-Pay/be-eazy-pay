@@ -56,6 +56,7 @@ class UserCardServiceTest {
                 .num("1234567890123456")
                 .expirationDate(expirationDate)
                 .paymentLimit(1_000_000)
+                .cardValid(true)
                 .build();
 
         List<UserCard> user1Cards = List.of(user1Card1);
