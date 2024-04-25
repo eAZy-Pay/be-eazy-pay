@@ -5,6 +5,7 @@ import com.eazy.pay.dao.PaymentHistoryRepository;
 import com.eazy.pay.dao.UserCardHistoryRepository;
 import com.eazy.pay.dao.UserCardRepository;
 import com.eazy.pay.dto.CompletedPaymentDTO;
+import com.eazy.pay.dto.PayRequestDTO;
 import com.eazy.pay.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,14 @@ public class PayService {
     @Autowired
     CategoryRepository categoryRepository;
 
-    public Object pay(Long userId, Long categoryId, Integer price, String storeCode, String storeName){
+    public Object pay(PayRequestDTO requestdto){
+
+        Long userId = requestdto.getUserId();
+        Long categoryId = requestdto.getCategoryId();
+        Integer price =requestdto.getPrice();
+        String storeCode = requestdto.getStoreCode();
+        String storeName =requestdto.getStoreName();
+
         // 결제에 사용할 카드 선택
         UserCard selectedCard = selectCardToPay(userId, categoryId, price);
 
