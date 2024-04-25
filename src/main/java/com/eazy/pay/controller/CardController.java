@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class CardController {
             @RequestParam(value = "name", required = false) Optional<String> name,
             // PageableDefault를 사용하여 기본값 설정, size는 한 페이지에 보여줄 개수
             @PageableDefault(size = 10) Pageable pageable
-            ) {
+    ) {
 
         //orElse: 파라미터로 값을 받는다.
         //orElseGet: 파라미터로 함수형 인터페이스(함수)를 받는다.
@@ -42,9 +43,14 @@ public class CardController {
                         name.map(n -> cardService.getCardsLikeName(n, pageable)) // name이 있는 경우 해당하는 카드 반환
                                 .orElseGet(() -> cardService.getAllCards(pageable))); // name이 없는 경우 모든 카드 반환
     }
-    @GetMapping("/simple-user-card-benefit-performance")public BenefitAndSimpleUserCardsDTO getBenefitSimple(@RequestParam("user_id") Long userId){    //최대 4개 카드 선택 (아직 정렬 x)
-        return userCardService.getSimpleBenefitDashboardByUserId(userId);
+    @GetMapping("/simple-user-card-benefit-performance")
+    public BenefitAndSimpleUserCardsDTO getBenefitSimple(
+            @RequestParam("user_id") Long userId,
+            @RequestParam("month") int month
+    ) {
+        return userCardService.getSimpleBenefitDashboardByUserId(userId, month);
     }
+
 
     @GetMapping("/{cardId}")
     public CardWithBenefitDTO getCardWithBenefitByCardId(@PathVariable("cardId") Long cardId) {
@@ -57,8 +63,22 @@ public class CardController {
     }
 
     @DeleteMapping("/{cardId}")
-    public void deleteCard(@PathVariable("cardId") Long cardId) {
-        cardService.deleteCard(cardId);
+    public ResponseEntity<String> deleteCard(@PathVariable("cardId") Long cardId) {
+        try {
+            cardService.deleteCard(cardId);
+            return ResponseEntity.ok("카드가 성공적으로 삭제되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("삭제할 카드가 없습니다.");
+        }
     }
 
+    @PatchMapping("/{cardId}")
+    public CardDTO updateCard(@PathVariable("cardId") Long cardId, @RequestBody CardDTO cardDTO) {
+        return cardService.updateCard(cardId, cardDTO);
+    }
+
+    @GetMapping("/highlighted")
+    public List<CardDTO> getHighlightedCards(@RequestParam("event_category_id") Long eventCategoryId) {
+        return cardService.getHighlightedCards(eventCategoryId);
+    }
 }

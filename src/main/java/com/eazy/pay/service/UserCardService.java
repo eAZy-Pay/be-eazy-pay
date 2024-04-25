@@ -11,12 +11,14 @@ import com.eazy.pay.model.PaymentHistory;
 import com.eazy.pay.model.UserCard;
 import com.eazy.pay.dao.UserCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -33,54 +35,53 @@ public class UserCardService {
     }
 
     // UserId로 자신의 보유 카드 모두가져오기
-    public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserId(userId);}
-    // 자신의 보유 카드 4개까지만 가져오기
-    public List<UserCard> getUserCardsByUserIdWithLimit4(Long userId){return  userCardRepository.findByUserIdLimit4(userId);}
+    public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
 
+    public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId, int month) {
+            List<UserCard> userCards = userCardRepository.findByUserUid(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
 
-    public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId) {
-        List<UserCard> userCards = userCardRepository.findByUserId(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
         int totalBenefitAmount = 0; // 모든 카드들의 3개월간 혜택
+        int totalPaymentLimit = 0; // 총 payment limit 초기화
 
         List<SimpleUserCardDTO> cards = new ArrayList<>(); //리턴할 DTO에 넣어줄 보유카드의 상품+사용 정보
         List<SimpleUserCardDTO> beforeSort = new ArrayList<>(); //모든 보유카드의 계산된 사용 정보에 따라 정렬하기 전 임시 리스트
 
-        for (UserCard uc : userCards){
-            int benefitAmount3 = 0; // 3개월간 혜택
-            Card card = uc.getCard(); //카드 상품 정보 가져오기
+        // 날짜 계산
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = now.minusMonths(month - 1).withDayOfMonth(1); // 설정된 month에 따라 시작일을 계산
+        LocalDate endDate = now; // 오늘 날짜로 종료일을 설정
+        
+
+        for (UserCard uc : userCards) {
+            Card card = uc.getCard();
             String cardNum = uc.getNum();
+            int paymentLimit = uc.getPaymentLimit();
 
-            //해당 보유 카드의 최근3개월 모든 거래내역
-            List<PaymentHistory> payBenefitsFor3 =
-                    paymentHistoryRepository.findByCardNumAndDateWithinDate(cardNum,
-                            Timestamp.valueOf(LocalDate.now().minusMonths(3).atStartOfDay())
-                    ).orElse(null);
-            if (payBenefitsFor3 != null){
-                for (PaymentHistory pb : payBenefitsFor3) {
-                benefitAmount3 += pb.getBenefitAmount();
-                }
-            }
-
-            totalBenefitAmount += benefitAmount3;
-
-            int benefitAmount1 = 0; // 이번 달 혜택
-            int useAmount = 0; // 이번 달 사용액
-            //해당 보유 카드의 최근 1개월 모든 거래 내역
-            List<PaymentHistory> payBenefitsFor1 =
-                    paymentHistoryRepository.findByCardNumAndDateWithinDate(cardNum,
-                            Timestamp.valueOf(LocalDate.now().minusMonths(1).atStartOfDay())
+            // 해당 카드의 특정 월 기간 내 모든 거래내역 가져오기
+            List<PaymentHistory> payBenefitsForMonth =
+                    paymentHistoryRepository.findByCardNumAndDateWithinDate(
+                            cardNum,
+                            Timestamp.valueOf(startDate.atStartOfDay()), // 시작 날짜를 Timestamp로 변환
+                            Timestamp.valueOf(endDate.plusDays(1).atStartOfDay()) // 종료 날짜에 1일 더해 포함되게 처리
                     ).orElse(null);
 
-            if (payBenefitsFor1 != null){ // 거래내역이 아예 없으면 게산하지 않음
-                for (PaymentHistory pb : payBenefitsFor1) {
-                    benefitAmount1 += pb.getBenefitAmount();
+            int benefitAmount = 0;
+            int useAmount = 0;
+
+            if (payBenefitsForMonth != null) {
+                for (PaymentHistory pb : payBenefitsForMonth) {
+                    benefitAmount += pb.getBenefitAmount();
                     useAmount += pb.getPaymentAmount();
                 }
             }
 
+            totalBenefitAmount += benefitAmount; // 총 혜택 금액 누적
+            totalPaymentLimit += paymentLimit; // 총 payment limit 누적
+
             SimpleUserCardDTO userCard = SimpleUserCardDTO.builder()
                             .card(card)
-                            .benefitAmount(benefitAmount1)
+                            .benefitAmount(benefitAmount)
+                            .paymentLimit(paymentLimit)
                             .useAmount(useAmount)
                             .build();
 
@@ -97,6 +98,7 @@ public class UserCardService {
 
         return BenefitAndSimpleUserCardsDTO.builder()
                 .benefitAmount(totalBenefitAmount)
+                .totalPaymentLimit(totalPaymentLimit)
                 .cards(cards)
                 .build();
     }
@@ -145,16 +147,51 @@ public class UserCardService {
     }
 
     public void createUserCard(UserCardDTO userCardDTO) {
+
+        // 사용자 ID와 카드 ID가 없을 경우 예외 발생
+        if (userCardDTO.getUserId() == null || userCardDTO.getCardId() == null) {
+            throw new IllegalArgumentException("사용자 ID와 카드 ID는 필수 입력값입니다.");
+        }
+        // 카드 만료일이 없을 경우 5년 뒤로 설정
+        if (userCardDTO.getExpirationDate() == null) {
+            Date expirationDate = new Date();
+            expirationDate.setYear(expirationDate.getYear() + 5);
+            userCardDTO.setExpirationDate(expirationDate);
+        }
+        // 카드번호 값이 없을 경우 랜덤 값으로 설정
+        if (userCardDTO.getNum() == null) {
+            long randomNumber = (long)(Math.random() * 10_000_000_000_000_000L); // 0 ~ 9999999999999999 사이의 랜덤 숫자 생성
+            String formattedNumber = String.format("%016d", randomNumber); // 16자리로 포맷팅
+            // 이미 존재하는 카드번호인지 확인
+            while (userCardRepository.existsByNum(formattedNumber)) {
+                randomNumber = (long)(Math.random() * 10_000_000_000_000_000L);
+                formattedNumber = String.format("%016d", randomNumber);
+            }
+            userCardDTO.setNum(formattedNumber);
+        }
+        // 결제 한도 값이 없을 경우 300만원으로 설정
+        if (userCardDTO.getPaymentLimit() <= 0) {
+            userCardDTO.setPaymentLimit(3_000_000);
+        }
+        // 카드 활성화 여부와 eAZy 카드와 연결 여부를 true로 설정
+        userCardDTO.setCardValid(true);
+        userCardDTO.setLinkEazy(true);
+
         UserCard userCard = UserCardMapper.INSTANCE.toEntity(userCardDTO);
         userCardRepository.save(userCard); // 저장
     }
 
     public void disableUserCard(Long userCardId) {
-        UserCard userCard = userCardRepository.findById(userCardId).orElseThrow(() ->
+        UserCard userCard = userCardRepository.findByUid(userCardId).orElseThrow(() ->
                 new IllegalArgumentException("유효하지 않은 카드 ID입니다.")
         );
         userCard.setCardValid(false);
         userCardRepository.save(userCard);
+    }
+
+    public boolean checkUserCard(Long userId, Long cardId) {
+        return userCardRepository.findByUserUid(userId).stream()
+                .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
     }
 
 }
