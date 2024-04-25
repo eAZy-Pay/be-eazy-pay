@@ -35,15 +35,13 @@ public class UserCardService {
     }
 
     // UserId로 자신의 보유 카드 모두가져오기
-    public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId, PageRequest.of(0, 100));}
-    // 자신의 보유 카드 4개까지만 가져오기
-    public List<UserCard> getUserCardsByUserIdWithLimit4(Long userId){return  userCardRepository.findByUserUid(userId, PageRequest.of(0, 4));}
-
+    public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
 
     public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId, int month) {
-            List<UserCard> userCards = userCardRepository.findByUserUid(userId, PageRequest.of(0, 100)); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
+            List<UserCard> userCards = userCardRepository.findByUserUid(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
 
         int totalBenefitAmount = 0; // 모든 카드들의 3개월간 혜택
+        int totalPaymentLimit = 0; // 총 payment limit 초기화
 
         List<SimpleUserCardDTO> cards = new ArrayList<>(); //리턴할 DTO에 넣어줄 보유카드의 상품+사용 정보
         List<SimpleUserCardDTO> beforeSort = new ArrayList<>(); //모든 보유카드의 계산된 사용 정보에 따라 정렬하기 전 임시 리스트
@@ -57,6 +55,7 @@ public class UserCardService {
         for (UserCard uc : userCards) {
             Card card = uc.getCard();
             String cardNum = uc.getNum();
+            int paymentLimit = uc.getPaymentLimit();
 
             // 해당 카드의 특정 월 기간 내 모든 거래내역 가져오기
             List<PaymentHistory> payBenefitsForMonth =
@@ -77,10 +76,12 @@ public class UserCardService {
             }
 
             totalBenefitAmount += benefitAmount; // 총 혜택 금액 누적
+            totalPaymentLimit += paymentLimit; // 총 payment limit 누적
 
             SimpleUserCardDTO userCard = SimpleUserCardDTO.builder()
                             .card(card)
                             .benefitAmount(benefitAmount)
+                            .paymentLimit(paymentLimit)
                             .useAmount(useAmount)
                             .build();
 
@@ -97,6 +98,7 @@ public class UserCardService {
 
         return BenefitAndSimpleUserCardsDTO.builder()
                 .benefitAmount(totalBenefitAmount)
+                .totalPaymentLimit(totalPaymentLimit)
                 .cards(cards)
                 .build();
     }
@@ -180,7 +182,7 @@ public class UserCardService {
     }
 
     public void disableUserCard(Long userCardId) {
-        UserCard userCard = userCardRepository.findById(userCardId).orElseThrow(() ->
+        UserCard userCard = userCardRepository.findByUid(userCardId).orElseThrow(() ->
                 new IllegalArgumentException("유효하지 않은 카드 ID입니다.")
         );
         userCard.setCardValid(false);
@@ -188,7 +190,7 @@ public class UserCardService {
     }
 
     public boolean checkUserCard(Long userId, Long cardId) {
-        return userCardRepository.findByUserUid(userId, PageRequest.of(0, 100)).stream()
+        return userCardRepository.findByUserUid(userId).stream()
                 .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
     }
 

@@ -1,16 +1,17 @@
 package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.model.UserCard;
 import com.eazy.pay.service.UserCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
@@ -18,6 +19,12 @@ public class UserController {
 
     @Autowired
     private UserCardService userCardService;
+
+    @GetMapping("/card")
+    public ResponseEntity<List<UserCard>> getUserCard(@RequestParam("user_id") Long userId) {
+        List<UserCard> userCards = userCardService.getUserCardsByUserId(userId);
+        return ResponseEntity.ok(userCards);
+    }
 
     @PostMapping("/card")
     public ResponseEntity<Map<String, String>> saveUserCard(@RequestBody UserCardDTO userCardDTO) {
@@ -35,6 +42,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
+
     @PatchMapping("/card/{userCardId}")
     public ResponseEntity<Map<String, String>> disableUserCard(@PathVariable Long userCardId) {
         Map<String, String> responseMap = new HashMap<>();
@@ -53,11 +61,11 @@ public class UserController {
 
     // 사용자가 해당 카드를 소유하고 있고 카드가 활성화 상태인지 확인
     @GetMapping("/cards/check")
-    public ResponseEntity<Map<String, String>> checkUserCard(@RequestParam("userId") Long userId, @RequestParam("cardId") Long cardId) {
+    public ResponseEntity<Map<String, String>> checkUserCard(@RequestParam("userId") Long userId,
+            @RequestParam("cardId") Long cardId) {
         if (userId == null || cardId == null || userId <= 0 || cardId <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    Map.of("error", "사용자 ID와 카드 ID는 필수 입력값이며, 0보다 커야 합니다.")
-            );
+                    Map.of("error", "사용자 ID와 카드 ID는 필수 입력값이며, 0보다 커야 합니다."));
         }
 
         Map<String, String> responseMap = new HashMap<>();

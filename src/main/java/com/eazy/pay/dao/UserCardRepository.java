@@ -1,4 +1,5 @@
 package com.eazy.pay.dao;
+
 import com.eazy.pay.dto.PaymentHistoryDTO;
 import com.eazy.pay.model.UserCard;
 import org.springframework.data.domain.Page;
@@ -16,8 +17,7 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
 
     Optional<UserCard> findByUid(Long uid);
 
-    List<UserCard> findByUserUid(Long userUid, Pageable pageable);
-
+    List<UserCard> findByUserUid(Long userUid);
 
     // PaymentHistory 정보 조회
     @Query("SELECT new com.eazy.pay.dto.PaymentHistoryDTO(pb.paymentDate, pb.paymentAmount, pb.storeName) " +
@@ -32,8 +32,7 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
             @Param("userId") Long userId,
             @Param("year") int year,
             @Param("month") int month,
-            Pageable pageable
-    );
+            Pageable pageable);
 
     boolean existsByNum(String num);
 }
