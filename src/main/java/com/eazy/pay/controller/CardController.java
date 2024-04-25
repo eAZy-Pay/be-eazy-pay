@@ -34,7 +34,7 @@ public class CardController {
             @RequestParam(value = "name", required = false) Optional<String> name,
             // PageableDefault를 사용하여 기본값 설정, size는 한 페이지에 보여줄 개수
             @PageableDefault(size = 10) Pageable pageable
-            ) {
+    ) {
 
         //orElse: 파라미터로 값을 받는다.
         //orElseGet: 파라미터로 함수형 인터페이스(함수)를 받는다.
@@ -77,4 +77,8 @@ public class CardController {
         return cardService.updateCard(cardId, cardDTO);
     }
 
+    @GetMapping("/highlighted")
+    public List<CardDTO> getHighlightedCards(@RequestParam("event_category_id") Long eventCategoryId) {
+        return cardService.getHighlightedCards(eventCategoryId);
+    }
 }
