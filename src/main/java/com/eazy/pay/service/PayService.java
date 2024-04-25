@@ -165,7 +165,7 @@ public class PayService {
 
     //남은 실적에 따른 우선순위 정렬
     private List<UserCard> sortByRemainingPerformance(Long userId) {
-        List<UserCard> cardList = userCardRepository.findByUserId(userId);
+        List<UserCard> cardList = userCardRepository.findByUserUid(userId);
         cardList.sort((uc1, uc2) -> {
             UserCardHistory history1 = userCardHistoryRepository.findByUserCardIdAndDate(uc1.getUid(), java.sql.Date.valueOf(LocalDate.now()));
             UserCardHistory history2 = userCardHistoryRepository.findByUserCardIdAndDate(uc2.getUid(), java.sql.Date.valueOf(LocalDate.now()));
