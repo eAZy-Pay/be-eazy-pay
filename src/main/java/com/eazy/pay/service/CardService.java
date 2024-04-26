@@ -1,25 +1,28 @@
 package com.eazy.pay.service;
 
+import com.eazy.pay.dao.HighlightedCardRepository;
 import com.eazy.pay.dto.CardDTO;
 import com.eazy.pay.dto.CardWithBenefitDTO;
 import com.eazy.pay.mapper.CardMapper;
 import com.eazy.pay.mapper.CardWithBenefitMapper;
 import com.eazy.pay.model.Card;
 import com.eazy.pay.dao.CardRepository;
-import com.eazy.pay.model.CardBenefit;
+import com.eazy.pay.model.HighlightedCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class CardService {
 
     @Autowired
     private CardRepository cardRepository;
+
+    @Autowired
+    private HighlightedCardRepository highlightedCardRepository;
 
     public Page<CardDTO> getAllCards(Pageable pageable) {
 
@@ -61,5 +64,13 @@ public class CardService {
         card.setInfo(cardDTO.getInfo());
         cardRepository.save(card);
         return cardDTO;
+    }
+
+    public List<CardDTO> getHighlightedCards(Long eventCategoryId) {
+
+        return highlightedCardRepository.findByEventCategoryUid(eventCategoryId).stream()
+                .map(HighlightedCard::getCard)
+                .map(CardMapper.INSTANCE::toDTO)
+                .toList();
     }
 }

@@ -21,7 +21,7 @@ public class PaymentHistory extends BaseEntity {
     private Date paymentDate;
 
     @Column(name = "payment_amount")
-    private int paymentAmount;
+    private Integer paymentAmount;
 
     @Column(name = "store_code")
     private String storeCode;
@@ -33,6 +33,6 @@ public class PaymentHistory extends BaseEntity {
     private String categoryName;
 
     @Column(name = "benefit_amount")
-    private int benefitAmount;
+    private Integer benefitAmount;
 
 }

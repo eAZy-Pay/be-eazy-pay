@@ -1,20 +1,31 @@
 package com.eazy.pay.controller;
 
 import com.eazy.pay.dao.UserRepository;
+import com.eazy.pay.dto.CompletedPaymentDTO;
+import com.eazy.pay.dto.PayRequestDTO;
 import com.eazy.pay.dto.UserPinDTO;
 import com.eazy.pay.model.User;
+import com.eazy.pay.service.PayService;
+import com.eazy.pay.service.UserCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/shopping")
 public class ShoppingController {
+    @Autowired
+    PayService payService;
 
+    @PostMapping("/order")
+    public ResponseEntity payrequest(@RequestBody PayRequestDTO dto){
+        Object response = payService.pay(dto);
+        if(response.equals("NoAvailableCard")){
+            return ResponseEntity.status(500).body("NoAvailableCard");
+        }
+        return ResponseEntity.ok(response);
+    }
 }
