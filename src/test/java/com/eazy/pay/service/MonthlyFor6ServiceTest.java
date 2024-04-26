@@ -11,8 +11,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 
+import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,40 +55,47 @@ class MonthlyFor6ServiceTest {
                 .name("기타")
                 .build();
 
+        Date date = Date.valueOf("2024-04-01");
+
 
         MonthlyFor6 monthly1 = MonthlyFor6.builder()
                 .category(category1)
                 .user(user)
                 .useAmount(200_000)
+                .yearAndMonth(date)
                 .build();
 
         MonthlyFor6 monthly2 = MonthlyFor6.builder()
                 .category(category2)
                 .user(user)
                 .useAmount(100_000)
+                .yearAndMonth(date)
                 .build();
 
         MonthlyFor6 monthly3 = MonthlyFor6.builder()
                 .category(category3)
                 .user(user)
                 .useAmount(30_000)
+                .yearAndMonth(date)
                 .build();
 
         MonthlyFor6 monthly4 = MonthlyFor6.builder()
                 .category(category4)
                 .user(user)
                 .useAmount(0)
+                .yearAndMonth(date)
                 .build();
 
         List<MonthlyFor6> monthlyList = Arrays.asList(monthly1, monthly2, monthly3, monthly4);
 
-        when(monthlyFor6Repository.findByUserUid(1L)).thenReturn(monthlyList);
+        when(monthlyFor6Repository.findByUserIdAndDate(1L, date)).thenReturn(monthlyList);
     }
 
     @Test
     void getMonthlyFor6ByUserId() {
         // when: getMonthlyFor6ByUserId 메서드 실행 user uid가 1인 6개월 통계 조회
-        List<MonthlyFor6ResponseDTO> result = monthlyFor6Service.getMonthlyFor6ByUserId(1L);
+        Date date = Date.valueOf("2024-04-26");
+        List<MonthlyFor6ResponseDTO> result = monthlyFor6Service.getMonthlyFor6ByUserIdAndDate(1L, date);
 
         // then: user uid가 1인 6개월 통계가 조회되어야 함
         assertEquals(3, result.size());
@@ -101,7 +108,8 @@ class MonthlyFor6ServiceTest {
         assertEquals("패션", result.get(2).getCategoryName());
         assertEquals(30_000, result.get(2).getUseAmount());
 
-        // monthlyFor6Repository.findByUserUid(1L) 메서드가 1번 호출되었는지 검증
-        verify(monthlyFor6Repository, times(1)).findByUserUid(1L);
+        // monthlyFor6Service.getMonthlyFor6ByUserIdAndYearAndMonth 메서드가 날짜를 입력받아 해당 달 1일로 변경하는지 검증
+        Date dateFirstDay = Date.valueOf("2024-04-01");
+        verify(monthlyFor6Repository, times(1)).findByUserIdAndDate(1L, dateFirstDay);
     }
 }

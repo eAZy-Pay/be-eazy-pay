@@ -22,7 +22,7 @@ public class ShoppingController {
 
     @PostMapping("/order")
     public ResponseEntity payrequest(@RequestBody PayRequestDTO dto){
-        Object response = payService.pay(dto.getUserId(), dto.getCategoryId(), dto.getPrice(), dto.getStoreCode(), dto.getStoreName());
+        Object response = payService.pay(dto);
         if(response.equals("NoAvailableCard")){
             return ResponseEntity.status(500).body("NoAvailableCard");
         }
