@@ -57,6 +57,8 @@ public class UserCardService {
             Card card = uc.getCard();
             String cardNum = uc.getNum();
             int paymentLimit = uc.getPaymentLimit();
+            boolean linkEazy = uc.isLinkEazy();
+            String num = uc.getNum();
 
             // 해당 카드의 특정 월 기간 내 모든 거래내역 가져오기
             List<PaymentHistory> payBenefitsForMonth =
@@ -85,6 +87,8 @@ public class UserCardService {
                             .benefitAmount(benefitAmount)
                             .paymentLimit(paymentLimit)
                             .useAmount(useAmount)
+                            .linkEazy(uc.isLinkEazy())
+                            .num(num)
                             .build();
 
             beforeSort.add(userCard); //정렬되기 이전 카드로 리스트에 추가

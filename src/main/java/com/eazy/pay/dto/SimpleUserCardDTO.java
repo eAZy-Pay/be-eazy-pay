@@ -13,4 +13,6 @@ public class SimpleUserCardDTO {
     private int benefitAmount;
     private int useAmount;
     private int paymentLimit;
+    private boolean linkEazy;
+    private String num;
 }
