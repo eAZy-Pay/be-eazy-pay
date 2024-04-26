@@ -10,7 +10,10 @@ import java.util.List;
 @ToString
 @Builder
 public class BenefitAndSimpleUserCardsDTO {
-    private int benefitAmount;
+
+    private int totalBenefitAmount;
     private int totalPaymentLimit;
+    private int totalUsedAmount;
+    private int availableFunds;
     private List<SimpleUserCardDTO> cards;
 }

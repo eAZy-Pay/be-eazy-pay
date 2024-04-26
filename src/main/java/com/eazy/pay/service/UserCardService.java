@@ -37,11 +37,12 @@ public class UserCardService {
     // UserId로 자신의 보유 카드 모두가져오기
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
 
-    public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId, int month) {
+    public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId, int month, int count) {
             List<UserCard> userCards = userCardRepository.findByUserUid(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
 
-        int totalBenefitAmount = 0; // 모든 카드들의 3개월간 혜택
-        int totalPaymentLimit = 0; // 총 payment limit 초기화
+        int totalBenefitAmount = 0; // 총 받은 혜택
+        int totalPaymentLimit = 0; // 총 결제 한도
+        int totalUsedAmount = 0; // 총 사용 금액
 
         List<SimpleUserCardDTO> cards = new ArrayList<>(); //리턴할 DTO에 넣어줄 보유카드의 상품+사용 정보
         List<SimpleUserCardDTO> beforeSort = new ArrayList<>(); //모든 보유카드의 계산된 사용 정보에 따라 정렬하기 전 임시 리스트
@@ -75,8 +76,9 @@ public class UserCardService {
                 }
             }
 
-            totalBenefitAmount += benefitAmount; // 총 혜택 금액 누적
-            totalPaymentLimit += paymentLimit; // 총 payment limit 누적
+            totalBenefitAmount += benefitAmount; 
+            totalPaymentLimit += paymentLimit;
+            totalUsedAmount += useAmount;
 
             SimpleUserCardDTO userCard = SimpleUserCardDTO.builder()
                             .card(card)
@@ -92,13 +94,16 @@ public class UserCardService {
 
         sortUserCards(beforeSort);  // 정렬 로직 호출
 
-        // 정렬된 리스트를 최대 4개의 요소만 선택하고 cards에 할당
-        int maxSize = Math.min(beforeSort.size(), 4);
+        // 정렬된 리스트를 최대 count의 수만큼 선택 후 cards에 할당, count가 0이면 모든 카드를 선택
+        int maxSize = (count <= 0) ? beforeSort.size() : Math.min(beforeSort.size(), count);
+
         cards = beforeSort.subList(0, maxSize);
 
         return BenefitAndSimpleUserCardsDTO.builder()
-                .benefitAmount(totalBenefitAmount)
+                .totalBenefitAmount(totalBenefitAmount)
                 .totalPaymentLimit(totalPaymentLimit)
+                .totalUsedAmount(totalUsedAmount)
+                .availableFunds(totalPaymentLimit - totalUsedAmount)
                 .cards(cards)
                 .build();
     }

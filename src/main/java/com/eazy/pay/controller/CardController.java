@@ -43,12 +43,13 @@ public class CardController {
                         name.map(n -> cardService.getCardsLikeName(n, pageable)) // name이 있는 경우 해당하는 카드 반환
                                 .orElseGet(() -> cardService.getAllCards(pageable))); // name이 없는 경우 모든 카드 반환
     }
-    @GetMapping("/simple-user-card-benefit-performance")
+    @GetMapping("/summary")
     public BenefitAndSimpleUserCardsDTO getBenefitSimple(
             @RequestParam("user_id") Long userId,
-            @RequestParam("month") int month
+            @RequestParam("month") int month,
+            @RequestParam("count") int count
     ) {
-        return userCardService.getSimpleBenefitDashboardByUserId(userId, month);
+        return userCardService.getSimpleBenefitDashboardByUserId(userId, month, count);
     }
 
 
