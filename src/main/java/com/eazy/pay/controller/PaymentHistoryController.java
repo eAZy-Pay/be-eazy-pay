@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.util.List;
 
 @RestController
@@ -48,9 +49,10 @@ public class PaymentHistoryController {
     }
 
     @GetMapping("/monthly-for-6")
-    public List<MonthlyFor6ResponseDTO> getMonthlyFor6ByUserId(@RequestParam("user_id") Long userId) {
-        return monthlyFor6Service.getMonthlyFor6ByUserId(userId);
+    public List<MonthlyFor6ResponseDTO> getMonthlyFor6ByUserIdAndDate(@RequestParam("user_id") Long userId,
+                                                                        @RequestParam(value = "date", required = false) Date date) {
+
+        Date useDate = date == null ? new Date(System.currentTimeMillis()) : date;
+        return monthlyFor6Service.getMonthlyFor6ByUserIdAndDate(userId, useDate);
     }
-
-
 }

@@ -62,7 +62,7 @@ class UserCardServiceTest {
         List<UserCard> user1Cards = List.of(user1Card1);
 
         lenient().when(userCardRepository.save(any(UserCard.class))).thenReturn(user1Card1);
-        lenient().when(userCardRepository.findById(1L)).thenReturn(Optional.of(user1Card1));
+        lenient().when(userCardRepository.findByUid(1L)).thenReturn(Optional.of(user1Card1));
         lenient().when(userCardRepository.findByUserUid(1L)).thenReturn(user1Cards);
     }
 

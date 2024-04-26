@@ -22,18 +22,6 @@ import java.util.Date;
 public class WooriCardUser extends BaseEntity {
 
     private String name;
-
-    private String id;
-
-    private String password;
-
-    private String email;
-
-    @Column(name = "phone_number")
-    private String phoneNumber;
-    @Column(name = "birthday")
-    @JsonFormat(pattern = "yyyyMMdd")
     private Date birthday;
 
-    private String pin;
 }
