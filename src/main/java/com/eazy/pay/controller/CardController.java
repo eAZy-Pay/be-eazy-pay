@@ -43,6 +43,8 @@ public class CardController {
                         name.map(n -> cardService.getCardsLikeName(n, pageable)) // name이 있는 경우 해당하는 카드 반환
                                 .orElseGet(() -> cardService.getAllCards(pageable))); // name이 없는 경우 모든 카드 반환
     }
+
+    // user의 보유카드들과 사용 정보
     @GetMapping("/summary")
     public BenefitAndSimpleUserCardsDTO getBenefitSimple(
             @RequestParam("user_id") Long userId,
