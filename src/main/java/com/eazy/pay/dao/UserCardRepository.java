@@ -15,9 +15,14 @@ import java.util.Optional;
 public interface UserCardRepository extends JpaRepository<UserCard, Long> {
     List<UserCard> findAll();
 
-    Optional<UserCard> findByUid(Long uid);
+    UserCard findByUid(Long uid);
+
+
+    @Query("SELECT uc FROM UserCard uc WHERE uc.user.uid = :uid")
+    Optional<UserCard> findByUserCardUid(Long uid);
 
     List<UserCard> findByUserUid(Long userUid);
+
 
     // PaymentHistory 정보 조회
     @Query("SELECT new com.eazy.pay.dto.PaymentHistoryDTO(pb.paymentDate, pb.paymentAmount, pb.storeName) " +

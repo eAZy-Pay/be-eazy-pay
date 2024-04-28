@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserCardService {
@@ -30,9 +27,15 @@ public class UserCardService {
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
 
+    public void deleteUserCard(Long userCardId) {
+        userCardRepository.deleteById(userCardId);
+    }
+
     public List<UserCard> getAllUserCards() {
         return userCardRepository.findAll();
     }
+
+    public UserCard getUserCardByUid(Long uid) {return userCardRepository.findByUid(uid);}
 
     // UserId로 자신의 보유 카드 모두가져오기
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
@@ -58,7 +61,10 @@ public class UserCardService {
             String cardNum = uc.getNum();
             int paymentLimit = uc.getPaymentLimit();
             boolean linkEazy = uc.isLinkEazy();
+            boolean cardValid = uc.isCardValid();
+            Date expirationDate = uc.getExpirationDate();
             String num = uc.getNum();
+            Long uid = uc.getUid();
 
             // 해당 카드의 특정 월 기간 내 모든 거래내역 가져오기
             List<PaymentHistory> payBenefitsForMonth =
@@ -84,11 +90,15 @@ public class UserCardService {
 
             SimpleUserCardDTO userCard = SimpleUserCardDTO.builder()
                             .card(card)
+                            .uid(uid)
                             .benefitAmount(benefitAmount)
                             .paymentLimit(paymentLimit)
                             .useAmount(useAmount)
-                            .linkEazy(uc.isLinkEazy())
+                            .expirationDate(expirationDate)
+                            .cardValid(cardValid)
+                            .linkEazy(linkEazy)
                             .num(num)
+
                             .build();
 
             beforeSort.add(userCard); //정렬되기 이전 카드로 리스트에 추가
@@ -191,11 +201,37 @@ public class UserCardService {
     }
 
     public void disableUserCard(Long userCardId) {
-        UserCard userCard = userCardRepository.findByUid(userCardId).orElseThrow(() ->
-                new IllegalArgumentException("유효하지 않은 카드 ID입니다.")
-        );
+        UserCard userCard = userCardRepository.findByUid(userCardId);
+
         userCard.setCardValid(false);
         userCardRepository.save(userCard);
+    }
+
+    public void toggleCardValidity(Long userCardId) {
+        UserCard userCard = userCardRepository.findById(userCardId)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        // 카드의 현재 유효성을 토글링
+        userCard.setCardValid(!userCard.isCardValid());
+        userCardRepository.save(userCard); // 변경된 유효성 저장
+    }
+
+    public void toggleCardLink(Long userCardId) {
+        UserCard userCard = userCardRepository.findById(userCardId)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        // 카드의 현재 유효성을 토글링
+        userCard.setLinkEazy(!userCard.isLinkEazy());
+        userCardRepository.save(userCard); // 변경된 유효성 저장
+    }
+
+    public void togglePaymentLimit(Long userCardId, int paymentLimit) {
+        UserCard userCard = userCardRepository.findById(userCardId)
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
+        // 카드의 현재 유효성을 토글링
+        userCard.setPaymentLimit(paymentLimit);
+        userCardRepository.save(userCard); // 변경된 유효성 저장
     }
 
     public boolean checkUserCard(Long userId, Long cardId) {
