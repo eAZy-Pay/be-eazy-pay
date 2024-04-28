@@ -34,7 +34,6 @@ public class ShoppingController {
         log.info("UserUid+ " + dto.getUserId() + " paid ₩" + responseDTO.getOriginalAmount()
                 + " with " + responseDTO.getCardName() + " card at " + dto.getStoreName()
                 + " and will be paid back ₩" + responseDTO.getDiscount() + " next month.");
-        log.error("결제 시 로그 에러");
         return ResponseEntity.ok(response);
     }
 }
