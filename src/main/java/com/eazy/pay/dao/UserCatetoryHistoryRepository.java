@@ -18,10 +18,14 @@ public interface UserCatetoryHistoryRepository extends JpaRepository<UserCategor
 
     @Query("SELECT uch FROM UserCategoryHistory uch WHERE uch.user.uid = :userId " +
             "AND YEAR(uch.yearAndMonth) = YEAR(:date) " +
-            "AND MONTH(uch.yearAndMonth) = MONTH(:date)")
+            "AND MONTH(uch.yearAndMonth) = MONTH(:date) " +
+            "AND uch.benefitAmount > 0 "
+    )
     List<UserCategoryHistory> findByUserUidAndDate(@Param("userId") Long userId, @Param("date") Date date);
 
     @Query("SELECT SUM(uch.benefitAmount) FROM UserCategoryHistory uch WHERE uch.user.uid = :userId " +
-            "AND YEAR(uch.yearAndMonth) = YEAR(:date) " )
+            "AND YEAR(uch.yearAndMonth) = YEAR(:date) "+
+            "AND uch.benefitAmount > 0 "
+    )
     Optional<Integer> findBenefitOfYearByUserUidAndDate(@Param("userId") Long userId, @Param("date") Date date);
 }

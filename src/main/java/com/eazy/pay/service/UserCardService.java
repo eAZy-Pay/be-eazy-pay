@@ -244,47 +244,75 @@ public class UserCardService {
     public CardUsageSummaryDTO getCardUsageSummary(Long userId) {
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         List<UserCard> userCardList = userCardRepository.findByUserUid(userId);
-        List<UserCategoryHistory> userCategoryHistoryList = userCatetoryHistoryRepository.findByUserUidAndDate(userId, date);
         int totalAnnualFee = 0;
         int benefitOfYear = 0;
         int benefitOfMonth = 0;
         List<CategoryBenefitAmountDTO> categoryBenefitAmountDTOList = new ArrayList<>();
-        if(!userCardList.isEmpty() && !userCategoryHistoryList.isEmpty()) {
+        if(!userCardList.isEmpty()) { //보유카드 존재
             //연회비 구하기
             for (UserCard userCard : userCardList) {
                 totalAnnualFee += userCard.getCard().getAnnualFee(); //모든 보유 카드의 연회비 누적
             }
+            // 이번 달 혜택 정보 중 값이 0 이상인 것만 가져오기
+            List<UserCategoryHistory> userCategoryHistoryList = userCatetoryHistoryRepository.findByUserUidAndDate(userId, date);
 
-            //각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
-            for (UserCategoryHistory userCategoryHistory : userCategoryHistoryList) {
-                int benefitAmount = userCategoryHistory.getBenefitAmount();
-                benefitOfMonth += benefitAmount;
-                categoryBenefitAmountDTOList.add(CategoryBenefitAmountDTO.builder()
-                        .categoryName(userCategoryHistory.getCategory().getName())
-                        .benefitAmount(benefitAmount)
+            if (!userCategoryHistoryList.isEmpty()) { // 월중 혜택 존재
+                //각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
+                for (UserCategoryHistory userCategoryHistory : userCategoryHistoryList) {
+                    int benefitAmount = userCategoryHistory.getBenefitAmount();
+                    benefitOfMonth += benefitAmount;
+                    categoryBenefitAmountDTOList.add(CategoryBenefitAmountDTO.builder()
+                            .categoryName(userCategoryHistory.getCategory().getName())
+                            .benefitAmount(benefitAmount)
+                            .build());
+                }
+
+                // 올해의 혜택 누적금액
+                Optional<Integer> benefitOfYearData = userCatetoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+                if (benefitOfYearData.isPresent()) {
+                    benefitOfYear = benefitOfYearData.get();
+                }
+
+                //각 카테고리별 혜택 금액을 내림차순으로 정렬하고 3개까지만 DTO에 담아서 리턴
+                List<CategoryBenefitAmountDTO> top3List = categoryBenefitAmountDTOList.stream()
+                        .sorted(Comparator.comparing(CategoryBenefitAmountDTO::getBenefitAmount).reversed())
+                        .limit(3)
+                        .collect(Collectors.toList());
+
+                //top3List에 포함되지 않는 나머지 카테고리명에 대한 월별 사용 금액을 합친 값 추가
+                int otherCategoryAmount = categoryBenefitAmountDTOList.stream()
+                        .filter(categoryBenefitAmountDTO -> top3List.stream()
+                                .noneMatch(top3 -> top3.getCategoryName().equals(categoryBenefitAmountDTO.getCategoryName())))
+                        .mapToInt(CategoryBenefitAmountDTO::getBenefitAmount)
+                        .sum();
+
+                top3List.add(CategoryBenefitAmountDTO.builder()
+                        .categoryName("기타")
+                        .benefitAmount(otherCategoryAmount)
                         .build());
-            }
 
+                //이번 달 혜택과 연회비, 올해의 혜택 누적금액 리턴
+                return CardUsageSummaryDTO.builder()
+                        .categoryBenefitAmount(top3List)
+                        .totalAnnualFee(totalAnnualFee)
+                        .benefitOfYear(benefitOfYear)
+                        .benefitOfMonth(benefitOfMonth)
+                        .build();
+            }
+            // 월중 혜택 부재
             // 올해의 혜택 누적금액
             Optional<Integer> benefitOfYearData = userCatetoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
-            if (benefitOfYearData.isPresent()) {
+            if (benefitOfYearData.isPresent()) { //연중 혜택 존재
                 benefitOfYear = benefitOfYearData.get();
+                // 아직 이번 달 결제 내역이 없음
+                return CardUsageSummaryDTO.builder()
+                        .benefitOfYear(benefitOfYear)
+                        .totalAnnualFee(totalAnnualFee)
+                        .build();
             }
 
-            //각 카테고리별 혜택 금액을 내림차순으로 정렬하고 3개까지만 DTO에 담아서 리턴
-            List<CategoryBenefitAmountDTO> top3List = categoryBenefitAmountDTOList.stream()
-                    .sorted(Comparator.comparing(CategoryBenefitAmountDTO::getBenefitAmount).reversed())
-                    .limit(3)
-                    .collect(Collectors.toList());
-
-            return CardUsageSummaryDTO.builder()
-                    .categoryBenefitAmount(top3List)
-                    .totalAnnualFee(totalAnnualFee)
-                    .benefitOfYear(benefitOfYear)
-                    .benefitOfMonth(benefitOfMonth)
-                    .build();
         }
-
+        // 아무 결제 내역이 없음, 연중 혜택 부재
         return CardUsageSummaryDTO.builder()
                 .totalAnnualFee(totalAnnualFee)
                 .build();
