@@ -173,7 +173,7 @@ public class PayService {
         } else { // 실적을 채우고 페이백 가능한 카드가 없다면
 
             // 혜택 없이 모든 카드 조회.
-            List<UserCard> userCards = userCardRepository.findByUsertest(userId);
+            List<UserCard> userCards = userCardRepository.findByUserId(userId);
             if (!userCards.isEmpty()) { // 보유한 카드가 있을 경우
 
                 // 카드 유효 체크

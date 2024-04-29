@@ -35,7 +35,7 @@ public class UserCardService {
         return userCardRepository.findAll();
     }
 
-    public UserCard getUserCardByUid(Long uid) {return userCardRepository.findByUid(uid);}
+    public UserCard getUserCardByUid(Long uid) {return userCardRepository.findByUid(uid).isPresent()? userCardRepository.findByUid(uid).get() : null; }
 
     // UserId로 자신의 보유 카드 모두가져오기
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
@@ -201,10 +201,12 @@ public class UserCardService {
     }
 
     public void disableUserCard(Long userCardId) {
-        UserCard userCard = userCardRepository.findByUid(userCardId);
-
-        userCard.setCardValid(false);
-        userCardRepository.save(userCard);
+        Optional<UserCard> userCard = userCardRepository.findByUid(userCardId);
+        if(userCard.isPresent()){
+           UserCard uc = userCard.get();
+        uc.setCardValid(false);
+        userCardRepository.save(uc);
+        }
     }
 
     public void toggleCardValidity(Long userCardId) {
