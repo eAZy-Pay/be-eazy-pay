@@ -5,6 +5,8 @@ import com.eazy.pay.dto.SignInDTO;
 import com.eazy.pay.dto.UserPinDTO;
 import com.eazy.pay.model.User;
 import com.eazy.pay.service.UserService;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@Slf4j
 @RestController
 public class AuthController {
     @Autowired
@@ -31,15 +34,18 @@ public class AuthController {
         if (user != null && passwordEncoder.matches(userPassword, user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            // 개발자가 설정한 로그
+            log.info("User logged in: " + user.getUid());
             return new SignInDTO(HttpStatus.OK, user.getUid(), user.getUsername(), user.getIsAdmin());
         } else {
+            // 개발자가 설정한 로그
+            log.info("User login failed");
             return new SignInDTO(HttpStatus.UNAUTHORIZED);
         }
     }
 
     @PostMapping(value = "/api/checkpin")
     public ResponseEntity order(@RequestBody UserPinDTO userPinDTO) {
-        // findById로 User객체를 가져오기
         Optional<User> optionalUser = userRepository.findById(userPinDTO.getUid());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();

@@ -11,4 +11,5 @@ public class PaymentHistoryDTO {
     private Date paymentDate;
     private int paymentAmount;
     private String storeName;
+    private String cardNum;
 }

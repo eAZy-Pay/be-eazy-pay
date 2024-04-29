@@ -8,10 +8,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
+
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -24,6 +22,17 @@ public class UserController {
     public ResponseEntity<List<UserCard>> getUserCard(@RequestParam("user_id") Long userId) {
         List<UserCard> userCards = userCardService.getUserCardsByUserId(userId);
         return ResponseEntity.ok(userCards);
+    }
+
+    @DeleteMapping("/card")
+    public ResponseEntity<String> deleteUserCard(@RequestParam("userCardId") Long userCardId) {
+        userCardService.deleteUserCard(userCardId);
+        return ResponseEntity.ok("카드가 성공적으로 삭제되었습니다.");
+    }
+
+    @GetMapping("/select-card")
+    public UserCard selectUserCard(@RequestParam("uid") Long uid) {
+        return userCardService.getUserCardByUid(uid);
     }
 
     @PostMapping("/card")
@@ -58,6 +67,42 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
+
+    @PatchMapping("card/toggle-valid/{userCardId}")
+    public ResponseEntity<Map<String,String>> toggleUserCardValidity(@PathVariable("userCardId") Long userCardId) {
+        userCardService.toggleCardValidity(userCardId);
+
+        // JSON 형식으로 응답을 반환
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Card validity toggled successfully.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("card/toggle-link/{userCardId}")
+    public ResponseEntity<Map<String,String>> toggleUserCardLink(@PathVariable("userCardId") Long userCardId) {
+        userCardService.toggleCardLink(userCardId);
+
+        // JSON 형식으로 응답을 반환
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Card Link toggled successfully.");
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("card/toggle-payment-limit/{userCardId}")
+    public ResponseEntity<Map<String,String>> toggleUserCardPaymentLimit(
+            @PathVariable("userCardId") Long userCardId,
+            @RequestBody Map<String, Integer> requestBody
+    ) {
+        int paymentLimit = requestBody.get("paymentLimit"); // 본문에서 paymentLimit 추출
+        userCardService.togglePaymentLimit(userCardId, paymentLimit);
+
+        // JSON 형식으로 응답을 반환
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Card PaymentLimit toggled successfully.");
+        return ResponseEntity.ok(response);
+    }
+
+
 
     // 사용자가 해당 카드를 소유하고 있고 카드가 활성화 상태인지 확인
     @GetMapping("/cards/check")

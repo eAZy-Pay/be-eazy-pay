@@ -11,3 +11,4 @@ public class PaymentStatsDTO{
     private int totalPaymentCount;
     private Integer totalPaymentAmount;
 }
+
