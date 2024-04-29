@@ -1,9 +1,6 @@
 package com.eazy.pay.service;
 
-import com.eazy.pay.dao.CategoryRepository;
-import com.eazy.pay.dao.PaymentHistoryRepository;
-import com.eazy.pay.dao.UserCardHistoryRepository;
-import com.eazy.pay.dao.UserCardRepository;
+import com.eazy.pay.dao.*;
 import com.eazy.pay.dto.CompletedPaymentDTO;
 import com.eazy.pay.dto.PayRequestDTO;
 import com.eazy.pay.model.*;
@@ -24,6 +21,8 @@ public class PayService {
     PaymentHistoryRepository paymentHistoryRepository;
     @Autowired
     CategoryRepository categoryRepository;
+    @Autowired
+    UserCatetgoryHistoryRepository userCatetgoryHistoryRepository;
 
     public Object pay(PayRequestDTO requestdto){
 
@@ -102,6 +101,7 @@ public class PayService {
                 tmh.setIs_fulfilled(card.getPerformance() <= tmh.getUseAmount() + paymentAmount ? true : false); //이번 결제로 실적 완성?
                 userCardHistoryRepository.save(tmh);
 
+
             }else{// 이미 저장된 내역이 없을 경우 UserCardHistory 생성
                 UserCardHistory uch = UserCardHistory.builder()
                         .userCard(selectedCard)
@@ -111,6 +111,29 @@ public class PayService {
                         .is_fulfilled(card.getPerformance() <= price ? true : false)
                         .build();
                 userCardHistoryRepository.save(uch);
+            }
+
+
+            //------------------------------------------카테고리별 혜택 내역 저장--------------------------------------------------
+
+            if (discount >0) {
+                Optional<UserCategoryHistory> categoryHistory = userCatetgoryHistoryRepository.findByUserUidAndCategoryIdAndDate(userId, categoryId, getDate());
+
+                if (categoryHistory.isPresent()) {
+                    UserCategoryHistory ucyh = categoryHistory.get();
+                    ucyh.setBenefitAmount(ucyh.getBenefitAmount() + discount);
+                    ucyh.setUseAmount(ucyh.getUseAmount() + price);
+                    userCatetgoryHistoryRepository.save(ucyh);
+                } // 이미 저장된 내역이 있을 경우 UserCategoryHistory 업데이트
+                else {// 이미 저장된 내역이 없을 경우 UserCategoryHistory 생성
+                    userCatetgoryHistoryRepository.save(UserCategoryHistory.builder()
+                            .user(selectedCard.getUser())
+                            .category(category)
+                            .yearAndMonth(java.sql.Date.valueOf(LocalDate.now().withDayOfMonth(1)))
+                            .benefitAmount(discount)
+                            .useAmount(price)
+                            .build());
+                }
             }
 
             // 결제 완료 정보 응답
