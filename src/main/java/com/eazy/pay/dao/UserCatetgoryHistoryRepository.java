@@ -1,7 +1,6 @@
 package com.eazy.pay.dao;
 
 import com.eazy.pay.model.UserCategoryHistory;
-import org.hibernate.annotations.Parent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserCatetoryHistoryRepository extends JpaRepository<UserCategoryHistory, Long> {
+public interface UserCatetgoryHistoryRepository extends JpaRepository<UserCategoryHistory, Long> {
 
     List<UserCategoryHistory> findByUserUid(Long userId);
 

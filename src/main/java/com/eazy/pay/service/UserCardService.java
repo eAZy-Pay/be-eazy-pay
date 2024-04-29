@@ -1,7 +1,7 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.PaymentHistoryRepository;
-import com.eazy.pay.dao.UserCatetoryHistoryRepository;
+import com.eazy.pay.dao.UserCatetgoryHistoryRepository;
 import com.eazy.pay.dto.*;
 import com.eazy.pay.mapper.UserCardMapper;
 import com.eazy.pay.model.*;
@@ -25,7 +25,7 @@ public class UserCardService {
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
     @Autowired
-    private UserCatetoryHistoryRepository userCatetoryHistoryRepository;
+    private UserCatetgoryHistoryRepository userCategoryHistoryRepository;
 
     public void deleteUserCard(Long userCardId) {
         userCardRepository.deleteById(userCardId);
@@ -254,7 +254,7 @@ public class UserCardService {
                 totalAnnualFee += userCard.getCard().getAnnualFee(); //모든 보유 카드의 연회비 누적
             }
             // 이번 달 혜택 정보 중 값이 0 이상인 것만 가져오기
-            List<UserCategoryHistory> userCategoryHistoryList = userCatetoryHistoryRepository.findByUserUidAndDate(userId, date);
+            List<UserCategoryHistory> userCategoryHistoryList = userCategoryHistoryRepository.findByUserUidAndDate(userId, date);
 
             if (!userCategoryHistoryList.isEmpty()) { // 월중 혜택 존재
                 //각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
@@ -268,7 +268,7 @@ public class UserCardService {
                 }
 
                 // 올해의 혜택 누적금액
-                Optional<Integer> benefitOfYearData = userCatetoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+                Optional<Integer> benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
                 if (benefitOfYearData.isPresent()) {
                     benefitOfYear = benefitOfYearData.get();
                 }
@@ -301,7 +301,7 @@ public class UserCardService {
             }
             // 월중 혜택 부재
             // 올해의 혜택 누적금액
-            Optional<Integer> benefitOfYearData = userCatetoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+            Optional<Integer> benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
             if (benefitOfYearData.isPresent()) { //연중 혜택 존재
                 benefitOfYear = benefitOfYearData.get();
                 // 아직 이번 달 결제 내역이 없음
