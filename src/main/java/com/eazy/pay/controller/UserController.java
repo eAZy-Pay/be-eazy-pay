@@ -131,4 +131,11 @@ public class UserController {
         }
     }
 
+    @GetMapping("/sorted-valid-cards")
+    public List<UserCardDTO> getValidUserCards(@RequestParam("user_uid") Long userUid){
+        List<UserCardDTO> validUserCards = userCardService.getValidUserCardsByUserId(userUid);
+//         TODO: validUserCards를 결제 알고리즘에 따라 순위를 매겨 정렬한 결과 리스트를 리턴하기
+        return validUserCards;
+    }
+
 }

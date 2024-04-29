@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserCardService {
@@ -237,6 +238,16 @@ public class UserCardService {
     public boolean checkUserCard(Long userId, Long cardId) {
         return userCardRepository.findByUserUid(userId).stream()
                 .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
+    }
+
+    public List<UserCardDTO> getValidUserCardsByUserId(Long userUid) {
+
+        List<UserCard> validUserCards = userCardRepository.findByUserUidAndCardValid(userUid, true);
+        // UserCard 엔티티 목록을 UserCardDTO 리스트로 변환
+        List<UserCardDTO> validUserCardDTOList = validUserCards.stream()
+                .map(UserCardMapper.INSTANCE::toDTO)
+                .collect(Collectors.toList());
+        return validUserCardDTOList;
     }
 
 }

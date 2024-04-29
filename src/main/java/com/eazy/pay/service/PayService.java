@@ -171,30 +171,30 @@ public class PayService {
 
 
         } else { // 실적을 채우고 페이백 가능한 카드가 없다면
-
+            return null; // 에러 때문에 임시로 주석 달음
             // 혜택 없이 모든 카드 조회.
-            List<UserCard> userCards = userCardRepository.findByUsertest(userId);
-            if (!userCards.isEmpty()) { // 보유한 카드가 있을 경우
-
-                // 카드 유효 체크
-                Map<UserCard, String> availabilityChecked = checkavailableCards(userCards, price);
-                // availabilityChecked의 entry value가 "ABAILABLE"인 카드만 필터링
-                userCards = availabilityChecked.entrySet().stream()
-                        .filter(entry -> entry.getValue().equals("AVAILABLE"))
-                        .map(Map.Entry::getKey)
-                        .toList();
-
-                if (!userCards.isEmpty()) {// 결제 가능 카드 보유
-                    // 같이 혜택이 없는데 실적이 적게 남은 카드를 선택하는 것이 맞는지 의문
-                        userCards = sortUserCardsByRemainingPerformance(userCards);
-                        return userCards.get(0); // 최우선 순위 카드 반환
-                }else {
-                    return null; //결제 가능한 카드가 없음
-                }
-
-            }else {//보유한 카드가 없음
-                return null;
-            }
+//            List<UserCard> userCards = userCardRepository.findByUsertest(userId);
+//            if (!userCards.isEmpty()) { // 보유한 카드가 있을 경우
+//
+//                // 카드 유효 체크
+//                Map<UserCard, String> availabilityChecked = checkavailableCards(userCards, price);
+//                // availabilityChecked의 entry value가 "ABAILABLE"인 카드만 필터링
+//                userCards = availabilityChecked.entrySet().stream()
+//                        .filter(entry -> entry.getValue().equals("AVAILABLE"))
+//                        .map(Map.Entry::getKey)
+//                        .toList();
+//
+//                if (!userCards.isEmpty()) {// 결제 가능 카드 보유
+//                    // 같이 혜택이 없는데 실적이 적게 남은 카드를 선택하는 것이 맞는지 의문
+//                        userCards = sortUserCardsByRemainingPerformance(userCards);
+//                        return userCards.get(0); // 최우선 순위 카드 반환
+//                }else {
+//                    return null; //결제 가능한 카드가 없음
+//                }
+//
+//            }else {//보유한 카드가 없음
+//                return null;
+//            }
         }
     }//selectCardToPay()
 

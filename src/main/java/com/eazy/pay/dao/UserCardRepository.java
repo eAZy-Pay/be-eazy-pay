@@ -39,4 +39,6 @@ public interface UserCardRepository extends JpaRepository<UserCard, Long> {
             Pageable pageable);
 
     boolean existsByNum(String num);
+
+    List<UserCard> findByUserUidAndCardValid(Long userUid, boolean cardValid);
 }
