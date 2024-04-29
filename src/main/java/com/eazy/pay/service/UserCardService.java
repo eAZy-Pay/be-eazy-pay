@@ -247,7 +247,7 @@ public class UserCardService {
         List<UserCategoryHistory> userCategoryHistoryList = userCatetoryHistoryRepository.findByUserUidAndDate(userId, date);
         int totalAnnualFee = 0;
         int benefitOfYear = 0;
-
+        int benefitOfMonth = 0;
         List<CategoryBenefitAmountDTO> categoryBenefitAmountDTOList = new ArrayList<>();
         if(!userCardList.isEmpty() && !userCategoryHistoryList.isEmpty()) {
             //연회비 구하기
@@ -255,10 +255,10 @@ public class UserCardService {
                 totalAnnualFee += userCard.getCard().getAnnualFee(); //모든 보유 카드의 연회비 누적
             }
 
-            //각 카테고리별 혜택 금액 구하기 & 혜택 금액 누적
+            //각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
             for (UserCategoryHistory userCategoryHistory : userCategoryHistoryList) {
                 int benefitAmount = userCategoryHistory.getBenefitAmount();
-
+                benefitOfMonth += benefitAmount;
                 categoryBenefitAmountDTOList.add(CategoryBenefitAmountDTO.builder()
                         .categoryName(userCategoryHistory.getCategory().getName())
                         .benefitAmount(benefitAmount)
@@ -281,6 +281,7 @@ public class UserCardService {
                     .categoryBenefitAmount(top3List)
                     .totalAnnualFee(totalAnnualFee)
                     .benefitOfYear(benefitOfYear)
+                    .benefitOfMonth(benefitOfMonth)
                     .build();
         }
 

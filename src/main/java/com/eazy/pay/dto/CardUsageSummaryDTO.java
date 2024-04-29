@@ -13,5 +13,6 @@ import java.util.List;
 public class CardUsageSummaryDTO {
     private List<CategoryBenefitAmountDTO> categoryBenefitAmount;
     private int totalAnnualFee;
+    private int benefitOfMonth;
     private int benefitOfYear;
 }
