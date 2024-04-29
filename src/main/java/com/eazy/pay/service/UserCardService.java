@@ -1,25 +1,21 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.PaymentHistoryRepository;
-import com.eazy.pay.dto.BenefitAndSimpleUserCardsDTO;
-import com.eazy.pay.dto.PaymentHistoryDTO;
-import com.eazy.pay.dto.SimpleUserCardDTO;
-import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.dao.UserCatetoryHistoryRepository;
+import com.eazy.pay.dto.*;
 import com.eazy.pay.mapper.UserCardMapper;
-import com.eazy.pay.model.Card;
-import com.eazy.pay.model.PaymentHistory;
-import com.eazy.pay.model.UserCard;
+import com.eazy.pay.model.*;
 import com.eazy.pay.dao.UserCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UserCardService {
@@ -29,6 +25,8 @@ public class UserCardService {
 
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
+    @Autowired
+    private UserCatetoryHistoryRepository userCatetoryHistoryRepository;
 
     public List<UserCard> getAllUserCards() {
         return userCardRepository.findAll();
@@ -194,4 +192,51 @@ public class UserCardService {
                 .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
     }
 
+    public CardUsageSummaryDTO getCardUsageSummary(Long userId) {
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        List<UserCard> userCardList = userCardRepository.findByUserUid(userId);
+        List<UserCategoryHistory> userCategoryHistoryList = userCatetoryHistoryRepository.findByUserUidAndDate(userId, date);
+        int totalAnnualFee = 0;
+        int benefitOfYear = 0;
+
+        List<CategoryBenefitAmountDTO> categoryBenefitAmountDTOList = new ArrayList<>();
+        if(!userCardList.isEmpty() && !userCategoryHistoryList.isEmpty()) {
+            //연회비 구하기
+            for (UserCard userCard : userCardList) {
+                totalAnnualFee += userCard.getCard().getAnnualFee(); //모든 보유 카드의 연회비 누적
+            }
+
+            //각 카테고리별 혜택 금액 구하기 & 혜택 금액 누적
+            for (UserCategoryHistory userCategoryHistory : userCategoryHistoryList) {
+                int benefitAmount = userCategoryHistory.getBenefitAmount();
+
+                categoryBenefitAmountDTOList.add(CategoryBenefitAmountDTO.builder()
+                        .categoryName(userCategoryHistory.getCategory().getName())
+                        .benefitAmount(benefitAmount)
+                        .build());
+            }
+
+            // 올해의 혜택 누적금액
+            Optional<Integer> benefitOfYearData = userCatetoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+            if (benefitOfYearData.isPresent()) {
+                benefitOfYear = benefitOfYearData.get();
+            }
+
+            //각 카테고리별 혜택 금액을 내림차순으로 정렬하고 3개까지만 DTO에 담아서 리턴
+            List<CategoryBenefitAmountDTO> top3List = categoryBenefitAmountDTOList.stream()
+                    .sorted(Comparator.comparing(CategoryBenefitAmountDTO::getBenefitAmount).reversed())
+                    .limit(3)
+                    .collect(Collectors.toList());
+
+            return CardUsageSummaryDTO.builder()
+                    .categoryBenefitAmount(top3List)
+                    .totalAnnualFee(totalAnnualFee)
+                    .benefitOfYear(benefitOfYear)
+                    .build();
+        }
+
+        return CardUsageSummaryDTO.builder()
+                .totalAnnualFee(totalAnnualFee)
+                .build();
+    }
 }
