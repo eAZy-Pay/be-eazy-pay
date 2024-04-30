@@ -41,7 +41,7 @@ public class UserCardService {
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
 
     public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId, int month, int count) {
-            List<UserCard> userCards = userCardRepository.findByUserUid(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
+        List<UserCard> userCards = userCardRepository.findByUserUid(userId); //자신의 모든 보유 카드 가져오기
 
         int totalBenefitAmount = 0; // 총 받은 혜택
         int totalPaymentLimit = 0; // 총 결제 한도
@@ -72,7 +72,7 @@ public class UserCardService {
                             cardNum,
                             Timestamp.valueOf(startDate.atStartOfDay()), // 시작 날짜를 Timestamp로 변환
                             Timestamp.valueOf(endDate.plusDays(1).atStartOfDay()) // 종료 날짜에 1일 더해 포함되게 처리
-                    ).orElse(null);
+                    );
 
             int benefitAmount = 0;
             int useAmount = 0;
