@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory, Long> {
 
     @Query("SELECT u.is_fulfilled FROM UserCardHistory u WHERE u.userCard.uid = :userCardId AND u.yearAndMonth = :yearAndMonth")
-    Boolean findIsFulfilledByUserCardIdAndYearAndMonth(@Param("userCardId") Long userCardId, @Param("yearAndMonth") Date yearAndMonth);
+    Boolean findIsFulfilledByUserCardIdAndDate(@Param("userCardId") Long userCardId, @Param("yearAndMonth") Date date);
 
     @Query("SELECT uch FROM UserCardHistory uch " +
             "WHERE uch.userCard.uid = :userCardId " +

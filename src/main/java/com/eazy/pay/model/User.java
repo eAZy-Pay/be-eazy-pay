@@ -5,10 +5,9 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import lombok.experimental.SuperBuilder;
-import java.util.Collection;
 
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Collection;
 
 @Entity
 @Table(name = "users")
@@ -31,9 +30,10 @@ public class User extends BaseEntity implements UserDetails {
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
     @Column(name = "birthday")
     @JsonFormat(pattern = "yyyyMMdd")
-    private Date birthday;
+    private LocalDate birthday;
 
     private String pin;
 

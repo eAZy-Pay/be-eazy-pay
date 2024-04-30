@@ -1,7 +1,6 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.UserCardHistoryRepository;
-import com.eazy.pay.model.UserCardHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +24,7 @@ public class UserCardHistoryService {
         Date lastMonthDateSql = Date.valueOf(lastMonthDate.withDayOfMonth(1));
 
         // 쿼리 결과
-        Boolean result = userCardHistoryRepository.findIsFulfilledByUserCardIdAndYearAndMonth(userCardId, lastMonthDateSql);
-
+        Boolean result = userCardHistoryRepository.findIsFulfilledByUserCardIdAndDate(userCardId, lastMonthDateSql);
 
         // 쿼리 결과가 null이면 기본값으로 false를 반환
         return result != null ? result : false;

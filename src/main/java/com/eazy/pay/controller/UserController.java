@@ -1,8 +1,11 @@
 package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.model.User;
 import com.eazy.pay.model.UserCard;
+import com.eazy.pay.service.UserCardHistoryService;
 import com.eazy.pay.service.UserCardService;
+import com.eazy.pay.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,21 @@ public class UserController {
 
     @Autowired
     private UserCardService userCardService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserCardHistoryService userCardHistoryService;
+
+    @GetMapping
+    public ResponseEntity<User> getUserInfo(@RequestParam("userId") Long userId) {
+        Optional<User> userOptional = userService.getUserById(userId);
+        return userOptional
+                .map(user -> ResponseEntity.ok().body(user))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
     @GetMapping("/card")
     public ResponseEntity<List<UserCard>> getUserCard(@RequestParam("user_id") Long userId) {
@@ -50,6 +68,11 @@ public class UserController {
             responseMap.put("error", "서버 내부 오류가 발생했습니다. 나중에 다시 시도해주세요.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
+    }
+
+    @GetMapping("/card/fulfilled")
+    public boolean getUserCardHistoriesFulfilled(@RequestParam("userCardId") Long userCardId) {
+        return userCardHistoryService.getUserCardHistoryFulfilled(userCardId);
     }
 
     @PatchMapping("/card/{userCardId}")
