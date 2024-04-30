@@ -1,23 +1,21 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.PaymentHistoryRepository;
-import com.eazy.pay.dto.BenefitAndSimpleUserCardsDTO;
-import com.eazy.pay.dto.PaymentHistoryDTO;
-import com.eazy.pay.dto.SimpleUserCardDTO;
-import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.dao.UserCatetgoryHistoryRepository;
+import com.eazy.pay.dto.*;
 import com.eazy.pay.mapper.UserCardMapper;
-import com.eazy.pay.model.Card;
-import com.eazy.pay.model.PaymentHistory;
-import com.eazy.pay.model.UserCard;
+import com.eazy.pay.model.*;
 import com.eazy.pay.dao.UserCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Service
 public class UserCardService {
@@ -27,6 +25,8 @@ public class UserCardService {
 
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
+    @Autowired
+    private UserCatetgoryHistoryRepository userCategoryHistoryRepository;
 
     public void deleteUserCard(Long userCardId) {
         userCardRepository.deleteById(userCardId);
@@ -36,7 +36,7 @@ public class UserCardService {
         return userCardRepository.findAll();
     }
 
-    public UserCard getUserCardByUid(Long uid) {return userCardRepository.findByUid(uid);}
+    public UserCard getUserCardByUid(Long uid) {return userCardRepository.findByUid(uid).isPresent()? userCardRepository.findByUid(uid).get() : null; }
 
     // UserId로 자신의 보유 카드 모두가져오기
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
@@ -202,10 +202,12 @@ public class UserCardService {
     }
 
     public void disableUserCard(Long userCardId) {
-        UserCard userCard = userCardRepository.findByUid(userCardId);
-
-        userCard.setCardValid(false);
-        userCardRepository.save(userCard);
+        Optional<UserCard> userCard = userCardRepository.findByUid(userCardId);
+        if(userCard.isPresent()){
+           UserCard uc = userCard.get();
+        uc.setCardValid(false);
+        userCardRepository.save(uc);
+        }
     }
 
     public void toggleCardValidity(Long userCardId) {
@@ -238,6 +240,83 @@ public class UserCardService {
     public boolean checkUserCard(Long userId, Long cardId) {
         return userCardRepository.findByUserUid(userId).stream()
                 .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
+    }
+
+    public CardUsageSummaryDTO getCardUsageSummary(Long userId) {
+        java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
+        List<UserCard> userCardList = userCardRepository.findByUserUid(userId);
+        int totalAnnualFee = 0;
+        int benefitOfYear = 0;
+        int benefitOfMonth = 0;
+        List<CategoryBenefitAmountDTO> categoryBenefitAmountDTOList = new ArrayList<>();
+        if(!userCardList.isEmpty()) { //보유카드 존재
+            //연회비 구하기
+            for (UserCard userCard : userCardList) {
+                totalAnnualFee += userCard.getCard().getAnnualFee(); //모든 보유 카드의 연회비 누적
+            }
+            // 이번 달 혜택 정보 중 값이 0 이상인 것만 가져오기
+            List<UserCategoryHistory> userCategoryHistoryList = userCategoryHistoryRepository.findByUserUidAndDate(userId, date);
+
+            if (!userCategoryHistoryList.isEmpty()) { // 월중 혜택 존재
+                //각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
+                for (UserCategoryHistory userCategoryHistory : userCategoryHistoryList) {
+                    int benefitAmount = userCategoryHistory.getBenefitAmount();
+                    benefitOfMonth += benefitAmount;
+                    categoryBenefitAmountDTOList.add(CategoryBenefitAmountDTO.builder()
+                            .categoryName(userCategoryHistory.getCategory().getName())
+                            .benefitAmount(benefitAmount)
+                            .build());
+                }
+
+                // 올해의 혜택 누적금액
+                Optional<Integer> benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+                if (benefitOfYearData.isPresent()) {
+                    benefitOfYear = benefitOfYearData.get();
+                }
+
+                //각 카테고리별 혜택 금액을 내림차순으로 정렬하고 3개까지만 DTO에 담아서 리턴
+                List<CategoryBenefitAmountDTO> top3List = categoryBenefitAmountDTOList.stream()
+                        .sorted(Comparator.comparing(CategoryBenefitAmountDTO::getBenefitAmount).reversed())
+                        .limit(3)
+                        .collect(Collectors.toList());
+
+                //top3List에 포함되지 않는 나머지 카테고리명에 대한 월별 사용 금액을 합친 값 추가
+                int otherCategoryAmount = categoryBenefitAmountDTOList.stream()
+                        .filter(categoryBenefitAmountDTO -> top3List.stream()
+                                .noneMatch(top3 -> top3.getCategoryName().equals(categoryBenefitAmountDTO.getCategoryName())))
+                        .mapToInt(CategoryBenefitAmountDTO::getBenefitAmount)
+                        .sum();
+
+                top3List.add(CategoryBenefitAmountDTO.builder()
+                        .categoryName("기타")
+                        .benefitAmount(otherCategoryAmount)
+                        .build());
+
+                //이번 달 혜택과 연회비, 올해의 혜택 누적금액 리턴
+                return CardUsageSummaryDTO.builder()
+                        .categoryBenefitAmount(top3List)
+                        .totalAnnualFee(totalAnnualFee)
+                        .benefitOfYear(benefitOfYear)
+                        .benefitOfMonth(benefitOfMonth)
+                        .build();
+            }
+            // 월중 혜택 부재
+            // 올해의 혜택 누적금액
+            Optional<Integer> benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+            if (benefitOfYearData.isPresent()) { //연중 혜택 존재
+                benefitOfYear = benefitOfYearData.get();
+                // 아직 이번 달 결제 내역이 없음
+                return CardUsageSummaryDTO.builder()
+                        .benefitOfYear(benefitOfYear)
+                        .totalAnnualFee(totalAnnualFee)
+                        .build();
+            }
+
+        }
+        // 아무 결제 내역이 없음, 연중 혜택 부재
+        return CardUsageSummaryDTO.builder()
+                .totalAnnualFee(totalAnnualFee)
+                .build();
     }
 
     public List<UserCardDTO> getValidUserCardsByUserId(Long userUid) {

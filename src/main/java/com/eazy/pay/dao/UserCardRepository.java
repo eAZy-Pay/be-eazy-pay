@@ -15,9 +15,11 @@ import java.util.Optional;
 public interface UserCardRepository extends JpaRepository<UserCard, Long> {
     List<UserCard> findAll();
 
-    UserCard findByUid(Long uid);
+    Optional<UserCard> findByUid(Long uid);
 
-
+    // UserCard 정보 조회: 순수 JPA 메서드 사용하면 이달의 첫 번째 결제에서 혜택 우선순위 선택이 제대로 안됨
+    @Query("SELECT uc FROM UserCard uc WHERE uc.user.uid = :userId")
+    List<UserCard> findByUserId(@Param("userId") Long userId);
     @Query("SELECT uc FROM UserCard uc WHERE uc.user.uid = :uid")
     Optional<UserCard> findByUserCardUid(Long uid);
 

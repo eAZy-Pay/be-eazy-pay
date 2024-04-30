@@ -131,6 +131,20 @@ public class UserController {
         }
     }
 
+    @GetMapping("/card-usage-summary")
+    public ResponseEntity<Map<String, Object>> getUserCardUsageSummary(@RequestParam("user_id") Long userId) {
+        Map<String, Object> responseMap = new HashMap<>();
+        try {
+            responseMap.put("data", userCardService.getCardUsageSummary(userId));
+            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+        } catch (DataAccessException dae) { // 데이터베이스 관련 예외 처리
+            responseMap.put("error", "데이터베이스 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMap);
+        } catch (Exception ex) { // 일반적인 예외 처리
+            responseMap.put("error", "서버 내부 오류가 발생했습니다. 나중에 다시 시도해주세요.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
+        }
+    }
     @GetMapping("/sorted-valid-cards")
     public List<UserCardDTO> getValidUserCards(@RequestParam("user_uid") Long userUid){
         List<UserCardDTO> validUserCards = userCardService.getValidUserCardsByUserId(userUid);
