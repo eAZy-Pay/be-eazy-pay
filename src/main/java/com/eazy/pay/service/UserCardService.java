@@ -24,6 +24,7 @@ public class UserCardService {
 
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
+
     @Autowired
     private UserCatetgoryHistoryRepository userCategoryHistoryRepository;
 

@@ -1,6 +1,9 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.UserCardHistoryRepository;
+import com.eazy.pay.dto.UserCardHistoryDTO;
+import com.eazy.pay.mapper.UserCardHistoryMapper;
+import com.eazy.pay.model.UserCardHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,5 +31,13 @@ public class UserCardHistoryService {
 
         // 쿼리 결과가 null이면 기본값으로 false를 반환
         return result != null ? result : false;
+    }
+
+    public void saveUserCardHistory(UserCardHistoryDTO userCardHistoryDTO) {
+
+        UserCardHistory userCardHistory = UserCardHistoryMapper.INSTANCE.toEntity(userCardHistoryDTO);
+
+        // UserCardHistory 저장
+        userCardHistoryRepository.save(userCardHistory);
     }
 }

@@ -2,6 +2,7 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.RecommendResponseDTO;
 import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.dto.UserCardHistoryDTO;
 import com.eazy.pay.model.User;
 import com.eazy.pay.model.UserCard;
 import com.eazy.pay.service.RecommendationService;
@@ -14,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,7 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
 
     @GetMapping
     public ResponseEntity<User> getUserInfo(@RequestParam("user_id") Long userId) {
@@ -66,6 +69,24 @@ public class UserController {
 
         try {
             userCardService.createUserCard(userCardDTO);
+            Long userCardId = userCardService.getUserCardsByUserId(userCardDTO.getUserId()).get(0).getUid();
+            Date date = new Date(System.currentTimeMillis());
+            Date firstDayOfMonth = Date.valueOf(date.toLocalDate().withDayOfMonth(1));
+            Date lastMonthDate = Date.valueOf(date.toLocalDate().minusMonths(1).withDayOfMonth(1));
+
+            // 당월, 전월의 실적 채움
+            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+                    .userCardId(userCardId)
+                    .yearAndMonth(firstDayOfMonth)
+                    .isFulfilled(true)
+                    .build());
+
+            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+                    .userCardId(userCardId)
+                    .yearAndMonth(lastMonthDate)
+                    .isFulfilled(true)
+                    .build());
+
             responseMap.put("message", "카드가 성공적으로 신청되었습니다.");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
         } catch (DataAccessException dae) { // 데이터베이스 관련 예외 처리
