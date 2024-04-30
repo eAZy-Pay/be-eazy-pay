@@ -11,8 +11,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAll();
 
+    Optional<User> findById(Long userId);
+
     @Query("SELECT u FROM User u WHERE u.id = ?1")
-    Optional<User> findByStrId(String strid);
+    Optional<User> findByLoginId(String loginId);
 
 
     Optional<User> findByNameAndPhoneNumber(String name, String phoneNumber);

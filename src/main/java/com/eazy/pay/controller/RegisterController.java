@@ -34,8 +34,8 @@ public class RegisterController {
     }
 
     @GetMapping(value = "/checkid")
-    public ResponseEntity checkId(@RequestParam("id") String strId) {
-        if (userService.getUserByStrId(strId) == null) {
+    public ResponseEntity checkId(@RequestParam("id") String loginId) {
+        if (userService.getUserByLoginId(loginId) == null) {
             return ResponseEntity.ok("id available");
         } else {
             return ResponseEntity.status(409).body("id already exists");
