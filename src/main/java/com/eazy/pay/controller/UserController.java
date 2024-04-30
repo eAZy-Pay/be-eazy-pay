@@ -2,10 +2,12 @@ package com.eazy.pay.controller;
 
 import com.eazy.pay.dto.RecommendResponseDTO;
 import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.model.User;
 import com.eazy.pay.model.UserCard;
 import com.eazy.pay.service.RecommendationService;
 import com.eazy.pay.service.UserCardHistoryService;
 import com.eazy.pay.service.UserCardService;
+import com.eazy.pay.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -29,6 +32,16 @@ public class UserController {
     @Autowired
     private UserCardHistoryService userCardHistoryService;
 
+    @Autowired
+    private UserService userService;
+
+    @GetMapping
+    public ResponseEntity<User> getUserInfo(@RequestParam("user_id") Long userId) {
+        Optional<User> userOptional = userService.getUserById(userId);
+        return userOptional
+                .map(user -> ResponseEntity.ok().body(user))
+                .orElse(ResponseEntity.notFound().build());
+    }
 
     @GetMapping("/card")
     public ResponseEntity<List<UserCard>> getUserCard(@RequestParam("user_id") Long userId) {
