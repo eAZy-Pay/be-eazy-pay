@@ -5,6 +5,7 @@ import com.eazy.pay.model.UserCardHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
@@ -47,4 +48,13 @@ public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory
     List<UserCard> findHaveBenefitCardsByUserIdAndCategoryId(@Param("userId") Long userId,
                                                                  @Param("categoryId") Long categoryId,
                                                                  @Param("now") Date date);
+
+    @Query("SELECT uch FROM UserCardHistory uch " +
+            "WHERE uch.userCard.user.uid = :userId ")
+    List<UserCardHistory> findByUserUid(@Param("userId") Long userId);
+
+    @Query("SELECT uch FROM UserCardHistory uch " +
+            "WHERE uch.userCard.user.uid = :userId " +
+            "AND uch.yearAndMonth = :date")
+    List<UserCardHistory> findByUserUidAndDate(@Param("userId") Long userId, @Param("date") Date date);
 }

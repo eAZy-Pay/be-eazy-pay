@@ -1,10 +1,13 @@
 package com.eazy.pay.model;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.Collection;

@@ -16,18 +16,24 @@ import java.sql.Date;
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-public class UserCategoryHistory extends BaseEntity{
+
+public class UserCategoryHistory extends BaseEntity {
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "uid")
     private User user;
+
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "uid")
     private Category category;
 
     @Column(name = "year_and_month")
     private Date yearAndMonth; //sql.Date
+
     @Column(name = "benefit_amount")
     private Integer benefitAmount;
+
     @Column(name = "use_amount")
     private Integer useAmount;
+
 }
