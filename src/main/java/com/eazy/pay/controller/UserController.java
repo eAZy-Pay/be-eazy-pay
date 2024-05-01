@@ -1,8 +1,11 @@
 package com.eazy.pay.controller;
 
+import com.eazy.pay.dto.RecommendResponseDTO;
 import com.eazy.pay.dto.UserCardDTO;
+import com.eazy.pay.dto.UserCardHistoryDTO;
 import com.eazy.pay.model.User;
 import com.eazy.pay.model.UserCard;
+import com.eazy.pay.service.RecommendationService;
 import com.eazy.pay.service.UserCardHistoryService;
 import com.eazy.pay.service.UserCardService;
 import com.eazy.pay.service.UserService;
@@ -12,7 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.sql.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
@@ -22,19 +29,22 @@ public class UserController {
     private UserCardService userCardService;
 
     @Autowired
-    private UserService userService;
+    private RecommendationService recommendationService;
 
     @Autowired
     private UserCardHistoryService userCardHistoryService;
 
+    @Autowired
+    private UserService userService;
+
+
     @GetMapping
-    public ResponseEntity<User> getUserInfo(@RequestParam("userId") Long userId) {
+    public ResponseEntity<User> getUserInfo(@RequestParam("user_id") Long userId) {
         Optional<User> userOptional = userService.getUserById(userId);
         return userOptional
                 .map(user -> ResponseEntity.ok().body(user))
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
     @GetMapping("/card")
     public ResponseEntity<List<UserCard>> getUserCard(@RequestParam("user_id") Long userId) {
@@ -59,6 +69,24 @@ public class UserController {
 
         try {
             userCardService.createUserCard(userCardDTO);
+            Long userCardId = userCardService.getUserCardsByUserId(userCardDTO.getUserId()).get(0).getUid();
+            Date date = new Date(System.currentTimeMillis());
+            Date firstDayOfMonth = Date.valueOf(date.toLocalDate().withDayOfMonth(1));
+            Date lastMonthDate = Date.valueOf(date.toLocalDate().minusMonths(1).withDayOfMonth(1));
+
+            // 당월, 전월의 실적 채움
+            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+                    .userCardId(userCardId)
+                    .yearAndMonth(firstDayOfMonth)
+                    .isFulfilled(true)
+                    .build());
+
+            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+                    .userCardId(userCardId)
+                    .yearAndMonth(lastMonthDate)
+                    .isFulfilled(true)
+                    .build());
+
             responseMap.put("message", "카드가 성공적으로 신청되었습니다.");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
         } catch (DataAccessException dae) { // 데이터베이스 관련 예외 처리
@@ -129,8 +157,8 @@ public class UserController {
 
     // 사용자가 해당 카드를 소유하고 있고 카드가 활성화 상태인지 확인
     @GetMapping("/cards/check")
-    public ResponseEntity<Map<String, String>> checkUserCard(@RequestParam("userId") Long userId,
-            @RequestParam("cardId") Long cardId) {
+    public ResponseEntity<Map<String, String>> checkUserCard(@RequestParam("user_id") Long userId,
+            @RequestParam("card_id") Long cardId) {
         if (userId == null || cardId == null || userId <= 0 || cardId <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     Map.of("error", "사용자 ID와 카드 ID는 필수 입력값이며, 0보다 커야 합니다."));
@@ -154,6 +182,7 @@ public class UserController {
         }
     }
 
+
     @GetMapping("/card-usage-summary")
     public ResponseEntity<Map<String, Object>> getUserCardUsageSummary(@RequestParam("user_id") Long userId) {
         Map<String, Object> responseMap = new HashMap<>();
@@ -168,4 +197,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
+
+    @GetMapping("/recommendation/card")
+    public RecommendResponseDTO getRecommendationCard(@RequestParam(value = "user_id", required = false) Long userId) {
+        if(userId == null || userId <= 0) {
+            return recommendationService.getRecommendation();
+        }
+        return recommendationService.getRecommendation(userId);
+    }
+
 }
