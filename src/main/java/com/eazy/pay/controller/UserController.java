@@ -213,7 +213,7 @@ public class UserController {
         return recommendationService.getRecommendation(userId);
     }
 
-    @GetMapping("/sorted-valid-cards")
+    @GetMapping("/sorted-valid-cards") // TEST
     public List<ValidUserCardDTO> getValidUserCards(@RequestParam("user_id") Long userUid){
         List<ValidUserCardDTO> validUserCards = userCardService.getValidUserCardsByUserId(userUid);
 //         TODO: validUserCards를 결제 알고리즘에 따라 순위를 매겨 정렬한 결과 리스트를 리턴하기
