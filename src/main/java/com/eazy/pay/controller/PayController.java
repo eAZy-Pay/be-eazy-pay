@@ -26,9 +26,9 @@ public class PayController {
         }
         // 개발자가 설정한 로그 - response 객체를 CompletedPaymentDTO로 변환
         CompletedPaymentDTO responseDTO = (CompletedPaymentDTO) response;
-        log.info("UserUid+ " + dto.getUserId() + " paid ₩" + responseDTO.getOriginalAmount()
+        log.info("UserUid+ " + dto.getUserId() + " paid ₩" + responseDTO.getPrice()
                 + " with " + responseDTO.getCardName() + " card at " + dto.getStoreName()
-                + " and will be paid back ₩" + responseDTO.getDiscount() + " next month.");
+                + " and will be paid back ₩" + responseDTO.getPayback() + " next month.");
         return ResponseEntity.ok(response);
     }
     @PostMapping("/user-select-order")
@@ -40,9 +40,9 @@ public class PayController {
         }
         // 개발자가 설정한 로그 - response 객체를 CompletedPaymentDTO로 변환
         CompletedPaymentDTO responseDTO = (CompletedPaymentDTO) response;
-        log.info("UserUid+ " + dto.getUserId() + " paid ₩" + responseDTO.getOriginalAmount()
+        log.info("UserUid+ " + dto.getUserId() + " paid ₩" + responseDTO.getPrice()
                 + " with " + responseDTO.getCardName() + " card at " + dto.getStoreName()
-                + " and will be paid back ₩" + responseDTO.getDiscount() + " next month.");
+                + " and will be paid back ₩" + responseDTO.getPayback() + " next month.");
         return ResponseEntity.ok(response);
     }
 

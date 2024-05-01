@@ -136,9 +136,8 @@ public class PayService {
             }
             // 결제 완료 정보 응답
             return CompletedPaymentDTO.builder()
-                    .originalAmount(price)
-                    .paidAmount(paymentAmount)
-                    .discount(discount)
+                    .price(price)
+                    .payback(discount)
                     .cardImage(card.getImage())
                     .cardName(card.getName())
                     .build();
@@ -261,9 +260,8 @@ public class PayService {
 
             // 결제 완료 정보 응답
             return CompletedPaymentDTO.builder()
-                    .originalAmount(price)
-                    .paidAmount(paymentAmount)
-                    .discount(discount)
+                    .price(price)
+                    .payback(discount)
                     .cardImage(card.getImage())
                     .cardName(card.getName())
                     .build();
