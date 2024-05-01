@@ -1,5 +1,6 @@
 package com.eazy.pay.service;
 
+import com.eazy.pay.dao.CardRepository;
 import com.eazy.pay.dao.PaymentHistoryRepository;
 import com.eazy.pay.dao.UserCatetgoryHistoryRepository;
 import com.eazy.pay.dto.*;
@@ -22,6 +23,8 @@ public class UserCardService {
 
     @Autowired
     private UserCardRepository userCardRepository;
+    @Autowired
+    private CardRepository cardRepository;
 
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
@@ -36,7 +39,9 @@ public class UserCardService {
         return userCardRepository.findAll();
     }
 
-    public UserCard getUserCardByUid(Long uid) {return userCardRepository.findByUid(uid).isPresent()? userCardRepository.findByUid(uid).get() : null; }
+    public UserCard getUserCardByUid(Long uid){
+        return userCardRepository.findByUid(uid).orElse(null);
+    }
 
     // UserId로 자신의 보유 카드 모두가져오기
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
@@ -319,14 +324,28 @@ public class UserCardService {
                 .build();
     }
 
-    public List<UserCardDTO> getValidUserCardsByUserId(Long userUid) {
 
+    public List<ValidUserCardDTO> getValidUserCardsByUserId(Long userUid) {
         List<UserCard> validUserCards = userCardRepository.findByUserUidAndCardValid(userUid, true);
         // UserCard 엔티티 목록을 UserCardDTO 리스트로 변환
-        List<UserCardDTO> validUserCardDTOList = validUserCards.stream()
+        List<UserCardDTO> userCardDTOs = validUserCards.stream()
                 .map(UserCardMapper.INSTANCE::toDTO)
                 .collect(Collectors.toList());
-        return validUserCardDTOList;
-    }
+        // UserCardDTO 리스트를 ValidUserCardDTO 리스트로 변환
+        List<ValidUserCardDTO> validUserCardDTOs = userCardDTOs.stream()
+                .map(dto -> {
+                    Card card = cardRepository.findByUid(dto.getCardId())
+                            .orElseThrow(() -> new RuntimeException("Card not found"));
+                    return ValidUserCardDTO.builder()
+                            .uid(dto.getUid())
+                            .userId(dto.getUserId())
+                            .cardId(dto.getCardId())
+                            .image(card.getImage())
+                            .cardName(card.getName())
+                            .build();
+                }).collect(Collectors.toList());
+        // PayService의 카드 결제 추천 함수 반환 값에서 예상 혜택 뽑아내서 validUserCardDTOs에 추가
 
+        return validUserCardDTOs;
+    }
 }
