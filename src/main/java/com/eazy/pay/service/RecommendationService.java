@@ -151,6 +151,9 @@ public class RecommendationService {
                 .map(UserCard::getCard)
                 .map(card -> {
                     Integer[] usage = cardUsageSum.get(card);
+                    if (usage == null) {
+                        usage = new Integer[]{0, 0};
+                    }
                     return CardWithBenefitAndUsageDTO.builder()
                             .cardWithBenefitDTO(CardWithBenefitMapper.INSTANCE.toDTO(card))
                             .useAmount(usage[0])
@@ -167,6 +170,9 @@ public class RecommendationService {
                 .map(UserCard::getCard)
                 .map(card -> {
                     Integer[] usage = cardUsageSum.get(card);
+                    if (usage == null) {
+                        usage = new Integer[]{0, 0};
+                    }
                     return CardWithBenefitAndUsageDTO.builder()
                             .cardWithBenefitDTO(CardWithBenefitMapper.INSTANCE.toDTO(card))
                             .useAmount(usage[0])
