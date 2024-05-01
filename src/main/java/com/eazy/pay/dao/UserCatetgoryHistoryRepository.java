@@ -23,10 +23,10 @@ public interface UserCatetgoryHistoryRepository extends JpaRepository<UserCatego
     List<UserCategoryHistory> findByUserUidAndDate(@Param("userId") Long userId, @Param("date") Date date);
 
     @Query("SELECT SUM(uch.benefitAmount) FROM UserCategoryHistory uch WHERE uch.user.uid = :userId " +
-            "AND YEAR(uch.yearAndMonth) = YEAR(:date) "+
+            "AND YEAR(uch.yearAndMonth) = YEAR(:date) " +
             "AND uch.benefitAmount > 0 "
     )
-    Optional<Integer> findBenefitOfYearByUserUidAndDate(@Param("userId") Long userId, @Param("date") Date date);
+    Integer findBenefitOfYearByUserUidAndDate(@Param("userId") Long userId, @Param("date") java.sql.Date date);
 
 
     @Query("SELECT uch FROM UserCategoryHistory uch WHERE uch.user.uid = :userId " +
@@ -34,6 +34,6 @@ public interface UserCatetgoryHistoryRepository extends JpaRepository<UserCatego
             "AND MONTH(uch.yearAndMonth) = MONTH(:date) "+
             "AND uch.category.uid = :categoryId "
     )
-    Optional<UserCategoryHistory> findByUserUidAndCategoryIdAndDate(@Param("userId") Long userId, @Param("categoryId") Long categoryId, @Param("date") Date date);
+    Optional<UserCategoryHistory> findBenefitOfMonthByUserUidAndCategoryIdAndDate(@Param("userId") Long userId, @Param("categoryId") Long categoryId, @Param("date") Date date);
 
 }

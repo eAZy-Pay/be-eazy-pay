@@ -115,7 +115,7 @@ public class PayService {
             //------------------------------------------카테고리별 혜택 내역 저장--------------------------------------------------
 
             if (discount >0) {
-                Optional<UserCategoryHistory> categoryHistory = userCatetgoryHistoryRepository.findByUserUidAndCategoryIdAndDate(userId, categoryId, getDate());
+                Optional<UserCategoryHistory> categoryHistory = userCatetgoryHistoryRepository.findBenefitOfMonthByUserUidAndCategoryIdAndDate(userId, categoryId, getDate());
 
                 if (categoryHistory.isPresent()) {
                     UserCategoryHistory ucyh = categoryHistory.get();
@@ -239,7 +239,7 @@ public class PayService {
             //------------------------------------------카테고리별 혜택 내역 저장--------------------------------------------------
 
             if (discount >0) {
-                Optional<UserCategoryHistory> categoryHistory = userCatetgoryHistoryRepository.findByUserUidAndCategoryIdAndDate(userId, categoryId, getDate());
+                Optional<UserCategoryHistory> categoryHistory = userCatetgoryHistoryRepository.findBenefitOfMonthByUserUidAndCategoryIdAndDate(userId, categoryId, getDate());
 
                 if (categoryHistory.isPresent()) {
                     UserCategoryHistory ucyh = categoryHistory.get();
