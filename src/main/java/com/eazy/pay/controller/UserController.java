@@ -177,7 +177,7 @@ public class UserController {
                 return ResponseEntity.status(HttpStatus.OK).body(responseMap);
             } else {
                 responseMap.put("message", "해당 카드를 소유하고 있지 않습니다.");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseMap);
+                return ResponseEntity.status(255).body(responseMap);
             }
         } catch (DataAccessException dae) { // 데이터베이스 관련 예외 처리
             responseMap.put("error", "데이터베이스 오류가 발생했습니다.");
