@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,6 +59,7 @@ class UserCardServiceTest {
         Date expirationDate = dateFormat.parse("2028-12-31");
         Date thisYearDate = dateFormat.parse(String.valueOf(LocalDate.now()));
         card1 = Card.builder()
+
                 .uid(1L)
                 .name("Test Card")
                 .benefitLimit(100000)
@@ -83,7 +85,7 @@ class UserCardServiceTest {
                 .card(card1)
                 .user(user1)
                 .num("1234567890123456")
-                .expirationDate(expirationDate)
+                .expirationDate(new java.sql.Date(expirationDate.getTime()))
                 .paymentLimit(1_000_000)
                 .cardValid(true)
                 .linkEazy(true)
@@ -203,13 +205,13 @@ class UserCardServiceTest {
     @Test
     void createUserCard() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date expirationDate = dateFormat.parse("2028-12-31");
+        Date expirationDate = new Date(dateFormat.parse("2028-12-31").getTime());
 
         UserCardDTO userCardDTO = UserCardDTO.builder()
                 .cardId(1L)
                 .userId(1L)
                 .num("1234567890123456")
-                .expirationDate(expirationDate)
+                .expirationDate(new java.sql.Date(expirationDate.getTime()))
                 .paymentLimit(1_000_000)
                 .build();
 

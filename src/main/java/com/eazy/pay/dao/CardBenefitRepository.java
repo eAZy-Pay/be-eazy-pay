@@ -13,4 +13,6 @@ public interface CardBenefitRepository extends JpaRepository<CardBenefit, Long> 
 
     Page<CardBenefit> findByCategoryUid(Long categoryId, Pageable pageable);
 
+    List<CardBenefit> findByCategoryUidIn(List<Long> categoryIds);
+
 }

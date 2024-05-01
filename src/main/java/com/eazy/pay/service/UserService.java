@@ -29,8 +29,13 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-    public User getUserByStrId(String strId) {
-        return userRepository.findByStrId(strId)
+    public Optional<User> getUserById(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user; // 올바르게 Optional 객체를 반환
+    }
+
+    public User getUserByLoginId(String loginId) {
+        return userRepository.findByLoginId(loginId)
                 .orElse(null);
     }
 

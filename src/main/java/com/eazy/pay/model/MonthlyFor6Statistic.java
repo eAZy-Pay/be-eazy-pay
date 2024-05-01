@@ -10,30 +10,24 @@ import lombok.experimental.SuperBuilder;
 import java.sql.Date;
 
 @Entity
-@Table(name = "user_category_histories")
+@Table(name = "monthly_for_6_statistics")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-
-public class UserCategoryHistory extends BaseEntity {
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "uid")
-    private User user;
+public class MonthlyFor6Statistic extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "uid")
     private Category category;
 
-    @Column(name = "year_and_month")
-    private Date yearAndMonth; //sql.Date
-
-    @Column(name = "benefit_amount")
-    private Integer benefitAmount;
-
     @Column(name = "use_amount")
-    private Integer useAmount;
+    private int useAmount;
 
+    @Column(name = "year_and_month")
+    private Date yearAndMonth;
+
+    @Column(name = "age")
+    private Integer age;
 }

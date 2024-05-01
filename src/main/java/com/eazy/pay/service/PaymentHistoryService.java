@@ -1,22 +1,24 @@
 package com.eazy.pay.service;
 
+import com.eazy.pay.dao.PaymentHistoryRepository;
+import com.eazy.pay.dao.UsageStatisticsRepository;
 import com.eazy.pay.dao.UserCardRepository;
+import com.eazy.pay.dao.UserRepository;
 import com.eazy.pay.dto.PaymentHistoryDTO;
 import com.eazy.pay.dto.PaymentStatsDTO;
 import com.eazy.pay.model.PaymentHistory;
-import com.eazy.pay.dao.PaymentHistoryRepository;
+import com.eazy.pay.model.UsageStatistic;
+import com.eazy.pay.model.User;
 import com.eazy.pay.model.UserCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
@@ -27,6 +29,12 @@ public class PaymentHistoryService {
 
     @Autowired
     private UserCardRepository userCardRepository;
+
+    @Autowired
+    private UsageStatisticsRepository usageStatisticsRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public PaymentStatsDTO getPaymentHistoryAndAmountForMonth(Long userId, int year, int month) {
         // 해당 유저가 가진 모든 카드 번호를 가져옴
@@ -76,5 +84,28 @@ public class PaymentHistoryService {
         return paymentHistoryRepository.findAll();
     }
 
+
+    public List<UsageStatistic> getUsageStaticsByUserIdAndDate(Long userId, Date yearAndMonth) {
+        if(userId == 0){
+            return usageStatisticsRepository.findByAgeAndDate(0, yearAndMonth);
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("해당 유저가 없습니다."));
+
+        int birthMonth = user.getBirthday().toLocalDate().getMonthValue();
+        int birthYear = user.getBirthday().toLocalDate().getYear();
+        int currentYear = LocalDate.now().getYear();
+
+        int age = currentYear - birthYear;
+        if (LocalDate.now().getMonthValue() < birthMonth) {
+            age--;
+        }
+
+        // 20 ~ 85세까지 5세 단위로 데이터 존재
+        age = (age / 5) * 5;
+        age = Math.max(age, 20);
+        age = Math.min(age, 85);
+        return usageStatisticsRepository.findByAgeAndDate(age, yearAndMonth);
+    }
 
 }
