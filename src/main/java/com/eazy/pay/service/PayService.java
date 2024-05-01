@@ -81,6 +81,7 @@ public class PayService {
                 return "NoAvailableCard";
             }
 
+            // TODO: 결제 시간이 다르게 나온다고 함. : sql Date 필요?
             //------------------------------------------결제 내역 저장--------------------------------------------------
             paymentHistoryRepository.save(PaymentHistory.builder()
                     .cardNum(payCard.getNum())
@@ -202,6 +203,7 @@ public class PayService {
                 return "NoAvailableCard";
             }
 
+            // TODO: 결제 시간이 다르게 나온다고 함.
             //------------------------------------------결제 내역 저장--------------------------------------------------
             paymentHistoryRepository.save(PaymentHistory.builder()
                     .cardNum(payCard.getNum())
@@ -299,11 +301,33 @@ public class PayService {
 
             for (UserCard uc : userCards){
 
+                //3. 혜택 한도를 고려한 페이백 금액을 전송할 수 있도록 혜택 한도가 반영되지 않았을 때는 임시 변수에 저장
+                double potentialPayback = (uc.getCard().getBenefitList().stream()
+                        .filter(cb -> cb.getCategory().getUid().equals(categoryId))
+                        .map(CardBenefit::getBenefitRate)
+                        .findFirst()
+                        .orElse(0) / 100.0 * price);
+
+                int finalPayback = 0;
+
+                //4. 계산된 potentialPayback이 카드의 benefitLimit를 초과하지 않도록 변경
+                Optional<UserCardHistory> thisMonthHistory = userCardHistoryRepository.findByUserCardIdAndDate(uc.getUid(), getDate());
+                if(thisMonthHistory.isPresent()){
+                    UserCardHistory tmh = thisMonthHistory.get();
+                    int thisMonthBenefitAmount = tmh.getBenefitAmount();
+                    int benefitLimit = uc.getCard().getBenefitLimit();
+
+                    // 혜택 한도 확인
+                    if( benefitLimit <= (thisMonthBenefitAmount + potentialPayback)){
+                        //이대로 결제하면 할인 한도가 초과될 때
+                        //최대 혜택금 - 받은 혜택금(혜택한도까지 남은 혜택)이 이번 결제의 페이백이 된다.
+                        finalPayback  = benefitLimit - thisMonthBenefitAmount;
+                    }else {finalPayback = (int) potentialPayback;}
+
+                }
+
                 result.add(UserPayCardDTO.builder()
-                        .payback((int) (uc.getCard().getBenefitList().stream().filter(cb -> cb.getCategory().getUid().equals(categoryId))
-                                .map(CardBenefit::getBenefitRate)
-                                .findFirst()
-                                .orElse(0)/100.0 * price))
+                        .payback(finalPayback)
                         .cardName(uc.getCard().getName())
                         .cardImage(uc.getCard().getImage())
                         .build());

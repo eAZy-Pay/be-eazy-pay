@@ -107,7 +107,6 @@ public class UserCardService {
                             .cardValid(cardValid)
                             .linkEazy(linkEazy)
                             .num(num)
-
                             .build();
 
             beforeSort.add(userCard); //정렬되기 이전 카드로 리스트에 추가
