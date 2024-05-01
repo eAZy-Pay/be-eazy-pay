@@ -69,24 +69,23 @@ public class UserController {
         Map<String, String> responseMap = new HashMap<>();
 
         try {
-            userCardService.createUserCard(userCardDTO);
-            Long userCardId = userCardService.getUserCardsByUserId(userCardDTO.getUserId()).get(0).getUid();
+            UserCard userCard = userCardService.createUserCard(userCardDTO);
             Date date = new Date(System.currentTimeMillis());
             Date firstDayOfMonth = Date.valueOf(date.toLocalDate().withDayOfMonth(1));
             Date lastMonthDate = Date.valueOf(date.toLocalDate().minusMonths(1).withDayOfMonth(1));
 
-            // 당월, 전월의 실적 채움
-            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
-                    .userCardId(userCardId)
-                    .yearAndMonth(firstDayOfMonth)
-                    .isFulfilled(true)
-                    .build());
-
-            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
-                    .userCardId(userCardId)
-                    .yearAndMonth(lastMonthDate)
-                    .isFulfilled(true)
-                    .build());
+//            // 당월, 전월의 실적 채움
+//            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+//                    .userCardId(userCard.getUid())
+//                    .yearAndMonth(firstDayOfMonth)
+//                    .isFulfilled(true)
+//                    .build());
+//
+//            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+//                    .userCardId(userCard.getUid())
+//                    .yearAndMonth(lastMonthDate)
+//                    .isFulfilled(true)
+//                    .build());
 
             responseMap.put("message", "카드가 성공적으로 신청되었습니다.");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);

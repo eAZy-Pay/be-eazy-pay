@@ -179,7 +179,7 @@ public class UserCardService {
                 }));
     }
 
-    public void createUserCard(UserCardDTO userCardDTO) {
+    public UserCard createUserCard(UserCardDTO userCardDTO) {
 
         // 사용자 ID와 카드 ID가 없을 경우 예외 발생
         if (userCardDTO.getUserId() == null || userCardDTO.getCardId() == null) {
@@ -211,7 +211,7 @@ public class UserCardService {
         userCardDTO.setLinkEazy(true);
 
         UserCard userCard = UserCardMapper.INSTANCE.toEntity(userCardDTO);
-        userCardRepository.save(userCard); // 저장
+        return userCardRepository.save(userCard); // 저장
     }
 
     public void disableUserCard(Long userCardId) {

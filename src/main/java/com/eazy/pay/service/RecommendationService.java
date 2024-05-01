@@ -77,9 +77,17 @@ public class RecommendationService {
         // [0] : 사용 금액, [1] : 혜택 금액
 
         // 카드별 사용 내역 집계
-        List<UserCardHistory> userCardHistoryList = userCardHistoryRepository.findByUserUid(userId).stream()
-                .filter(h -> (h.getYearAndMonth().after(threeMonthsAgo) || h.getYearAndMonth().equals(threeMonthsAgo)) && h.getYearAndMonth().before(now))
-                .toList();
+        List<UserCardHistory> userCardHistoryList = userCardHistoryRepository.findByUserUid(userId);
+        if (userCardHistoryList == null || userCardHistoryList.isEmpty()) {
+            return notEnoughData();
+        }
+
+        // 카테고리별 사용 내역 집계
+        List<UserCategoryHistory> userCategoryHistoryList = userCategoryHistoryRepository.findByUserId(userId);
+        if (userCategoryHistoryList == null || userCategoryHistoryList.isEmpty()) {
+            return notEnoughData();
+        }
+
 
         Map<UserCard, Integer[]> cardUsageSum = userCardHistoryList.stream()
                 .collect(Collectors.groupingBy(UserCardHistory::getUserCard,
@@ -87,10 +95,6 @@ public class RecommendationService {
                                 h -> new Integer[]{h.getUseAmount(), h.getBenefitAmount()},
                                 (a, b) -> new Integer[]{a[0] + b[0], a[1] + b[1]})));
 
-        // 카테고리별 사용 내역 집계
-        List<UserCategoryHistory> userCategoryHistoryList = userCategoryHistoryRepository.findByUserId(userId).stream()
-                .filter(h -> (h.getYearAndMonth().after(threeMonthsAgo) || h.getYearAndMonth().equals(threeMonthsAgo)) && h.getYearAndMonth().before(now))
-                .toList();
 
         Map<Category, Integer[]> categoryUsageSum = userCategoryHistoryList.stream()
                 .collect(Collectors.groupingBy(UserCategoryHistory::getCategory,
@@ -98,7 +102,7 @@ public class RecommendationService {
                                 h -> new Integer[]{h.getUseAmount(), h.getBenefitAmount()},
                                 (a, b) -> new Integer[]{a[0] + b[0], a[1] + b[1]})));
 
-        if(categoryUsageSum.isEmpty() || cardUsageSum.isEmpty()) {
+        if (cardUsageSum.isEmpty() || categoryUsageSum.isEmpty()) {
             return notEnoughData();
         }
 
