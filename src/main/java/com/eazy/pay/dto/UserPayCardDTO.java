@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class UserPayCardDTO {
+    private Long cardId;
     private Integer payback;
     private String cardName;
     private String cardImage;

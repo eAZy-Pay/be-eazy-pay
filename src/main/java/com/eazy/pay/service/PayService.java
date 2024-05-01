@@ -325,8 +325,9 @@ public class PayService {
                     }else {finalPayback = (int) potentialPayback;}
 
                 }
-
+                // 이번 반복문에서 유저카드 정보 리스트에 추가
                 result.add(UserPayCardDTO.builder()
+                        .cardId(uc.getUid())
                         .payback(finalPayback)
                         .cardName(uc.getCard().getName())
                         .cardImage(uc.getCard().getImage())
