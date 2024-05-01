@@ -139,18 +139,24 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("card/toggle-payment-limit/{userCardId}")
-    public ResponseEntity<Map<String,String>> toggleUserCardPaymentLimit(
+    @PatchMapping("/card/toggle-payment-limit/{userCardId}")
+    public ResponseEntity<?> toggleUserCardPaymentLimit(
             @PathVariable("userCardId") Long userCardId,
             @RequestBody Map<String, Integer> requestBody
     ) {
-        int paymentLimit = requestBody.get("paymentLimit"); // 본문에서 paymentLimit 추출
-        userCardService.togglePaymentLimit(userCardId, paymentLimit);
+        try {
+            int paymentLimit = requestBody.get("paymentLimit"); // 본문에서 paymentLimit 추출
+            userCardService.togglePaymentLimit(userCardId, paymentLimit);
 
-        // JSON 형식으로 응답을 반환
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Card PaymentLimit toggled successfully.");
-        return ResponseEntity.ok(response);
+            // JSON 형식으로 성공 응답 반환
+            return ResponseEntity.ok(Map.of("message", "Card payment limit updated successfully."));
+        } catch (IllegalArgumentException e) {
+            // 요청한 한도 변경이 허용되지 않을 때
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            // 카드를 찾을 수 없거나 다른 오류
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Card not found"));
+        }
     }
 
 
