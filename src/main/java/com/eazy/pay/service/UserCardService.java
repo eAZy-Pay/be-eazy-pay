@@ -55,7 +55,7 @@ public class UserCardService {
     public List<UserCard> getUserCardsByUserId(Long userId) {return userCardRepository.findByUserUid(userId);}
 
     public BenefitAndSimpleUserCardsDTO getSimpleBenefitDashboardByUserId(Long userId, int month, int count) {
-            List<UserCard> userCards = userCardRepository.findByUserUid(userId); //자신의 모든 보유 카드 가져오기 (혜택 순서로 정렬 구현 X)
+        List<UserCard> userCards = userCardRepository.findByUserUid(userId); //자신의 모든 보유 카드 가져오기
 
         int totalBenefitAmount = 0; // 총 받은 혜택
         int totalPaymentLimit = 0; // 총 결제 한도
@@ -86,7 +86,7 @@ public class UserCardService {
                             cardNum,
                             Timestamp.valueOf(startDate.atStartOfDay()), // 시작 날짜를 Timestamp로 변환
                             Timestamp.valueOf(endDate.plusDays(1).atStartOfDay()) // 종료 날짜에 1일 더해 포함되게 처리
-                    ).orElse(null);
+                    );
 
             int benefitAmount = 0;
             int useAmount = 0;
@@ -136,7 +136,7 @@ public class UserCardService {
                 .build();
     }
 
-    private void sortUserCards(List<SimpleUserCardDTO> cards) {
+     void sortUserCards(List<SimpleUserCardDTO> cards) {
         /*
         1. 실적과 혜택을 모두 채운 카드
         2. 실적만 채운 카드
@@ -261,12 +261,12 @@ public class UserCardService {
                 .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
     }
 
-    public CardUsageSummaryDTO getCardUsageSummary(Long userId) {
+    public CardUsageSummaryDTO getCardUsageSummary(Long userId) { // 카테고리 내용이 아닌 연회비는 dashBoard로 뺄 것
         java.sql.Date date = new java.sql.Date(System.currentTimeMillis());
         List<UserCard> userCardList = userCardRepository.findByUserUid(userId);
         int totalAnnualFee = 0;
-        int benefitOfYear = 0;
-        int benefitOfMonth = 0;
+        // 올해의 혜택 누적금액
+        int benefitOfYear = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
         List<CategoryBenefitAmountDTO> categoryBenefitAmountDTOList = new ArrayList<>();
         if(!userCardList.isEmpty()) { //보유카드 존재
             //연회비 구하기
@@ -278,6 +278,7 @@ public class UserCardService {
 
             if (!userCategoryHistoryList.isEmpty()) { // 월중 혜택 존재
                 //각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
+                int benefitOfMonth = 0;
                 for (UserCategoryHistory userCategoryHistory : userCategoryHistoryList) {
                     int benefitAmount = userCategoryHistory.getBenefitAmount();
                     benefitOfMonth += benefitAmount;
@@ -285,12 +286,6 @@ public class UserCardService {
                             .categoryName(userCategoryHistory.getCategory().getName())
                             .benefitAmount(benefitAmount)
                             .build());
-                }
-
-                // 올해의 혜택 누적금액
-                Optional<Integer> benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
-                if (benefitOfYearData.isPresent()) {
-                    benefitOfYear = benefitOfYearData.get();
                 }
 
                 //각 카테고리별 혜택 금액을 내림차순으로 정렬하고 3개까지만 DTO에 담아서 리턴
@@ -321,15 +316,14 @@ public class UserCardService {
             }
             // 월중 혜택 부재
             // 올해의 혜택 누적금액
-            Optional<Integer> benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
-            if (benefitOfYearData.isPresent()) { //연중 혜택 존재
-                benefitOfYear = benefitOfYearData.get();
-                // 아직 이번 달 결제 내역이 없음
-                return CardUsageSummaryDTO.builder()
-                        .benefitOfYear(benefitOfYear)
-                        .totalAnnualFee(totalAnnualFee)
-                        .build();
-            }
+
+
+            // 아직 이번 달 결제 내역이 없음
+            return CardUsageSummaryDTO.builder()
+                    .benefitOfYear(benefitOfYear)
+                    .totalAnnualFee(totalAnnualFee)
+                    .build();
+
 
         }
         // 아무 결제 내역이 없음, 연중 혜택 부재

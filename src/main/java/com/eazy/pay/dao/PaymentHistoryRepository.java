@@ -33,7 +33,7 @@ public interface PaymentHistoryRepository extends JpaRepository<PaymentHistory, 
 
 
     @Query("SELECT ph FROM PaymentHistory ph WHERE ph.cardNum = :cardNum AND ph.paymentDate BETWEEN :start AND :end")
-    Optional<List<PaymentHistory>> findByCardNumAndDateWithinDate(
+    List<PaymentHistory> findByCardNumAndDateWithinDate(
             @Param("cardNum") String cardNum,
             @Param("start") Timestamp start,
             @Param("end") Timestamp end

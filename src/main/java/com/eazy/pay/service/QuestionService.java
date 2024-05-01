@@ -50,17 +50,8 @@ public class QuestionService {
             existingQna.setContent(dto.getContent());
             questionRepository.save(existingQna);
             return true;
-        }else {
-            Question newQuestion = Question.builder()
-                    .title(dto.getTitle())
-                    .date(new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dto.getDate()))
-                    //Date.from(Instant.parse(dto.getDate()))
-                    .isAnswered(dto.getIsAnswered())
-                    .answer(dto.getAnswer())
-                    .build();
-            questionRepository.save(newQuestion);
-            return true;
         }
+        return false;
     }
 
     public boolean deleteQnaById(Long uid) {
@@ -79,6 +70,7 @@ public class QuestionService {
                     .userId(q.getUser().getUid())
                     .userName(q.getUser().getName())
                     .isAnswered(q.isAnswered())
+                    .answer(q.getAnswer())
                     .build();
         } else {
             return QnaDTO.builder().build();
