@@ -12,13 +12,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +34,7 @@ class UserCardServiceTest {
     @BeforeEach
     void setUp() throws Exception {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date expirationDate = dateFormat.parse("2028-12-31");
+        Date expirationDate = new Date(dateFormat.parse("2028-12-31").getTime());
 
         Card card1 = Card.builder()
                 .uid(1L)
@@ -69,7 +66,7 @@ class UserCardServiceTest {
     @Test
     void createUserCard() throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date expirationDate = dateFormat.parse("2028-12-31");
+        Date expirationDate = new Date(dateFormat.parse("2028-12-31").getTime());
 
         UserCardDTO userCardDTO = UserCardDTO.builder()
                 .cardId(1L)

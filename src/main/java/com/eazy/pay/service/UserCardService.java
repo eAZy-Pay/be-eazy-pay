@@ -11,8 +11,12 @@ import org.springframework.stereotype.Service;
 
 
 import java.sql.Timestamp;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -174,7 +178,7 @@ public class UserCardService {
         }
         // 카드 만료일이 없을 경우 5년 뒤로 설정
         if (userCardDTO.getExpirationDate() == null) {
-            Date expirationDate = new Date();
+            Date expirationDate = new Date(System.currentTimeMillis());
             expirationDate.setYear(expirationDate.getYear() + 5);
             userCardDTO.setExpirationDate(expirationDate);
         }

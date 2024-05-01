@@ -24,5 +24,5 @@ public class UserCardHistory extends BaseEntity{
     private Date yearAndMonth;
     private Integer benefitAmount;
     private Integer useAmount;
-    private Boolean is_fulfilled;
+    private Boolean isFulfilled;
 }

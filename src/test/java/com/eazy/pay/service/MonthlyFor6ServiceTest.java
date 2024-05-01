@@ -94,8 +94,9 @@ class MonthlyFor6ServiceTest {
     @Test
     void getMonthlyFor6ByUserId() {
         // when: getMonthlyFor6ByUserId 메서드 실행 user uid가 1인 6개월 통계 조회
-        Date date = Date.valueOf("2024-04-26");
+        Date date = Date.valueOf("2024-04-01");
         List<MonthlyFor6ResponseDTO> result = monthlyFor6Service.getMonthlyFor6ByUserIdAndDate(1L, date);
+
 
         // then: user uid가 1인 6개월 통계가 조회되어야 함
         assertEquals(3, result.size());
