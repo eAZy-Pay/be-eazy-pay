@@ -2,6 +2,7 @@ package com.eazy.pay.mapper;
 
 import com.eazy.pay.dto.MonthlyFor6ResponseDTO;
 import com.eazy.pay.model.MonthlyFor6;
+import com.eazy.pay.model.MonthlyFor6Statistic;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -14,4 +15,7 @@ public interface MonthlyFor6ResponseMapper {
     @Mapping(target = "categoryName", source = "category.name")
     MonthlyFor6ResponseDTO toDTO(MonthlyFor6 monthlyFor6);
 
+    @Mapping(target = "categoryId", source = "category.uid")
+    @Mapping(target = "categoryName", source = "category.name")
+    MonthlyFor6ResponseDTO toDTO(MonthlyFor6Statistic monthlyFor6Statistic);
 }

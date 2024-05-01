@@ -2,6 +2,7 @@ package com.eazy.pay.service;
 
 import com.eazy.pay.dao.CardRepository;
 import com.eazy.pay.dao.PaymentHistoryRepository;
+import com.eazy.pay.dao.UserCardHistoryRepository;
 import com.eazy.pay.dao.UserCatetgoryHistoryRepository;
 import com.eazy.pay.dto.*;
 import com.eazy.pay.mapper.UserCardMapper;
@@ -13,8 +14,12 @@ import org.springframework.stereotype.Service;
 
 
 import java.sql.Timestamp;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -24,10 +29,13 @@ public class UserCardService {
     @Autowired
     private UserCardRepository userCardRepository;
     @Autowired
+    private UserCardHistoryRepository userCardHistoryRepository;
+    @Autowired
     private CardRepository cardRepository;
 
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
+
     @Autowired
     private UserCatetgoryHistoryRepository userCategoryHistoryRepository;
 
@@ -179,7 +187,7 @@ public class UserCardService {
         }
         // 카드 만료일이 없을 경우 5년 뒤로 설정
         if (userCardDTO.getExpirationDate() == null) {
-            Date expirationDate = new Date();
+            Date expirationDate = new Date(System.currentTimeMillis());
             expirationDate.setYear(expirationDate.getYear() + 5);
             userCardDTO.setExpirationDate(expirationDate);
         }
@@ -237,10 +245,16 @@ public class UserCardService {
         UserCard userCard = userCardRepository.findById(userCardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
 
-        // 카드의 현재 유효성을 토글링
+        UserCardHistory currentMonthUsage = userCardHistoryRepository.findCurrentMonthUsageByUserCardId(userCardId);
+
+        if (currentMonthUsage != null && paymentLimit < currentMonthUsage.getUseAmount()) {
+            throw new IllegalArgumentException("사용 금액 이하로 한도를 변경하실 수 없습니다.");
+        }
+
         userCard.setPaymentLimit(paymentLimit);
-        userCardRepository.save(userCard); // 변경된 유효성 저장
+        userCardRepository.save(userCard);
     }
+
 
     public boolean checkUserCard(Long userId, Long cardId) {
         return userCardRepository.findByUserUid(userId).stream()

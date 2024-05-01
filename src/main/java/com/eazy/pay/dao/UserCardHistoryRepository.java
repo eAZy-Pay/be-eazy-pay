@@ -5,6 +5,7 @@ import com.eazy.pay.model.UserCardHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
@@ -14,11 +15,17 @@ import java.util.Optional;
 @Repository
 public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory, Long> {
 
+    @Query("SELECT u.isFulfilled FROM UserCardHistory u WHERE u.userCard.uid = :userCardId AND u.yearAndMonth = :yearAndMonth")
+    Boolean findIsFulfilledByUserCardIdAndDate(@Param("userCardId") Long userCardId, @Param("yearAndMonth") Date date);
+
     @Query("SELECT uch FROM UserCardHistory uch " +
             "WHERE uch.userCard.uid = :userCardId " +
             "AND MONTH(uch.yearAndMonth) = MONTH(:now) " +
             "AND YEAR(uch.yearAndMonth) = YEAR(:now) ")
     Optional<UserCardHistory> findByUserCardIdAndDate(@Param("userCardId") Long userCardId, @Param("now")  Date date);
+
+    @Query("SELECT uch FROM UserCardHistory uch WHERE uch.userCard.uid = :userCardId AND FUNCTION('MONTH', uch.yearAndMonth) = FUNCTION('MONTH', CURRENT_DATE) AND FUNCTION('YEAR', uch.yearAndMonth) = FUNCTION('YEAR', CURRENT_DATE)")
+    UserCardHistory findCurrentMonthUsageByUserCardId(@Param("userCardId") Long userCardId);
 
 
 
@@ -32,7 +39,7 @@ public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory
             "AND MONTH(uch.yearAndMonth) = MONTH(:now) -1 " +
             "AND YEAR(uch.yearAndMonth) = YEAR(:now) "+
             // 카드 실적 채움
-            "AND uch.is_fulfilled = true " +
+            "AND uch.isFulfilled = true " +
             // 해당 카테고리의 혜택을 가지고 있음
             "AND uch.userCard.card IN (SELECT cb.card FROM CardBenefit cb WHERE cb.category.uid = :categoryId) "+
             // 혜택을 받을 한도를 초과하지 않음 - 스칼라 값 (scalar value)받기 위해 SUM() 사용
@@ -44,4 +51,14 @@ public interface UserCardHistoryRepository extends JpaRepository<UserCardHistory
     List<UserCard> findHaveBenefitCardsByUserIdAndCategoryId(@Param("userId") Long userId,
                                                                  @Param("categoryId") Long categoryId,
                                                                  @Param("now") Date date);
+
+    @Query("SELECT uch FROM UserCardHistory uch " +
+            "WHERE uch.userCard.user.uid = :userId ")
+    List<UserCardHistory> findByUserUid(@Param("userId") Long userId);
+
+    @Query("SELECT uch FROM UserCardHistory uch " +
+            "WHERE uch.userCard.user.uid = :userId " +
+            "AND uch.yearAndMonth = :date")
+    List<UserCardHistory> findByUserUidAndDate(@Param("userId") Long userId, @Param("date") Date date);
 }
+
