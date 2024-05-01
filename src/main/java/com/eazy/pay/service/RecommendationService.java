@@ -77,13 +77,17 @@ public class RecommendationService {
         // [0] : 사용 금액, [1] : 혜택 금액
 
         // 카드별 사용 내역 집계
-        List<UserCardHistory> userCardHistoryList = userCardHistoryRepository.findByUserUid(userId);
+        List<UserCardHistory> userCardHistoryList = userCardHistoryRepository.findByUserUid(userId).stream()
+                .filter(userCardHistory -> userCardHistory.getYearAndMonth().after(threeMonthsAgo))
+                .toList();
         if (userCardHistoryList == null || userCardHistoryList.isEmpty()) {
             return notEnoughData();
         }
 
         // 카테고리별 사용 내역 집계
-        List<UserCategoryHistory> userCategoryHistoryList = userCategoryHistoryRepository.findByUserId(userId);
+        List<UserCategoryHistory> userCategoryHistoryList = userCategoryHistoryRepository.findByUserId(userId).stream()
+                .filter(userCategoryHistory -> userCategoryHistory.getYearAndMonth().after(threeMonthsAgo))
+                .toList();
         if (userCategoryHistoryList == null || userCategoryHistoryList.isEmpty()) {
             return notEnoughData();
         }
@@ -147,6 +151,9 @@ public class RecommendationService {
                 .map(UserCard::getCard)
                 .map(card -> {
                     Integer[] usage = cardUsageSum.get(card);
+                    if (usage == null) {
+                        usage = new Integer[]{0, 0};
+                    }
                     return CardWithBenefitAndUsageDTO.builder()
                             .cardWithBenefitDTO(CardWithBenefitMapper.INSTANCE.toDTO(card))
                             .useAmount(usage[0])
@@ -163,6 +170,9 @@ public class RecommendationService {
                 .map(UserCard::getCard)
                 .map(card -> {
                     Integer[] usage = cardUsageSum.get(card);
+                    if (usage == null) {
+                        usage = new Integer[]{0, 0};
+                    }
                     return CardWithBenefitAndUsageDTO.builder()
                             .cardWithBenefitDTO(CardWithBenefitMapper.INSTANCE.toDTO(card))
                             .useAmount(usage[0])

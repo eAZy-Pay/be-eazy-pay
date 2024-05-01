@@ -56,7 +56,8 @@ public class PaymentHistoryController {
 
     ) {
         Date useDate = date == null ? new Date(System.currentTimeMillis()) : date;
-        Date firstDayOfMonth = Date.valueOf(useDate.toLocalDate().withDayOfMonth(1));
+        // 전달 1일 6개월 평균 데이터는 전달부터 +6개월 전까지의 데이터를 가져옴
+        Date firstDayOfMonth = Date.valueOf(useDate.toLocalDate().minusMonths(1).withDayOfMonth(1));
 
         if(age != null && age >= 0){
             return monthlyFor6Service.getMonthlyFor6ByAgeAndDate(age, firstDayOfMonth);
