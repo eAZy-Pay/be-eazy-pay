@@ -2,7 +2,7 @@ package com.eazy.pay.dto;
 
 import lombok.*;
 
-import java.util.Date;
+import java.sql.Date;
 
 @Builder
 @Getter

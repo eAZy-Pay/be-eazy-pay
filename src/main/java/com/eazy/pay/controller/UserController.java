@@ -4,6 +4,7 @@ import com.eazy.pay.dto.RecommendResponseDTO;
 import com.eazy.pay.dto.UserCardDTO;
 import com.eazy.pay.dto.UserCardHistoryDTO;
 import com.eazy.pay.model.User;
+import com.eazy.pay.dto.ValidUserCardDTO;
 import com.eazy.pay.model.UserCard;
 import com.eazy.pay.service.RecommendationService;
 import com.eazy.pay.service.UserCardHistoryService;
@@ -210,6 +211,14 @@ public class UserController {
             return recommendationService.getRecommendation();
         }
         return recommendationService.getRecommendation(userId);
+    }
+
+    @GetMapping("/sorted-valid-cards")
+    public List<ValidUserCardDTO> getValidUserCards(@RequestParam("user_id") Long userUid){
+        List<ValidUserCardDTO> validUserCards = userCardService.getValidUserCardsByUserId(userUid);
+//         TODO: validUserCards를 결제 알고리즘에 따라 순위를 매겨 정렬한 결과 리스트를 리턴하기
+//         TODO: ValidUserCardDTO에 예상 혜택 필드 추가
+        return validUserCards;
     }
 
 }
