@@ -1,6 +1,7 @@
 package com.eazy.pay.service;
 
 import com.eazy.pay.dao.PaymentHistoryRepository;
+import com.eazy.pay.dao.UserCardHistoryRepository;
 import com.eazy.pay.dao.UserCatetgoryHistoryRepository;
 import com.eazy.pay.dto.*;
 import com.eazy.pay.mapper.UserCardMapper;
@@ -25,7 +26,8 @@ public class UserCardService {
 
     @Autowired
     private UserCardRepository userCardRepository;
-
+    @Autowired
+    private UserCardHistoryRepository userCardHistoryRepository;
     @Autowired
     private PaymentHistoryRepository paymentHistoryRepository;
 
@@ -236,10 +238,16 @@ public class UserCardService {
         UserCard userCard = userCardRepository.findById(userCardId)
                 .orElseThrow(() -> new RuntimeException("Card not found"));
 
-        // 카드의 현재 유효성을 토글링
+        UserCardHistory currentMonthUsage = userCardHistoryRepository.findCurrentMonthUsageByUserCardId(userCardId);
+
+        if (currentMonthUsage != null && paymentLimit < currentMonthUsage.getUseAmount()) {
+            throw new IllegalArgumentException("사용 금액 이하로 한도를 변경하실 수 없습니다.");
+        }
+
         userCard.setPaymentLimit(paymentLimit);
-        userCardRepository.save(userCard); // 변경된 유효성 저장
+        userCardRepository.save(userCard);
     }
+
 
     public boolean checkUserCard(Long userId, Long cardId) {
         return userCardRepository.findByUserUid(userId).stream()
