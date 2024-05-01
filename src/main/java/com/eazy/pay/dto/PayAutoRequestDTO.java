@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class PayRequestDTO {
+public class PayAutoRequestDTO {
     Long userId;
     Long categoryId;
     Integer price;

@@ -7,8 +7,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class PayRequestDTO {
+public class PayUserRequestDTO {
     Long userId;
+    Long cardId;
     Long categoryId;
     Integer price;
     String storeCode;
