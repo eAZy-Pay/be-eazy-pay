@@ -52,7 +52,7 @@ public class PayService {
                 // 카드가 가진 혜택 목록
                 List<CardBenefit> benefitList = card.getBenefitList();
 
-                if(lmh.getIs_fulfilled()){ //전월 실적달성 확인
+                if(lmh.getIsFulfilled()){ //전월 실적달성 확인
                     //전월 실적에 따른 할인율 적용
                     double benefitRate = benefitList.stream()
                             .filter(cb -> cb.getCategory().getUid().equals(categoryId))
@@ -96,7 +96,7 @@ public class PayService {
                 UserCardHistory tmh = thisMonthHistory.get();
                 tmh.setUseAmount(tmh.getUseAmount() + price);
                 tmh.setBenefitAmount(tmh.getBenefitAmount() + discount);
-                tmh.setIs_fulfilled(card.getPerformance() <= tmh.getUseAmount() + paymentAmount ? true : false); //이번 결제로 실적 완성?
+                tmh.setIsFulfilled(card.getPerformance() <= tmh.getUseAmount() + paymentAmount ? true : false); //이번 결제로 실적 완성?
                 userCardHistoryRepository.save(tmh);
 
 
@@ -106,7 +106,7 @@ public class PayService {
                         .yearAndMonth(java.sql.Date.valueOf(LocalDate.now().withDayOfMonth(1))) //Date에 sql저장하면 날짜 정확하지 않은 문제 있어서 엔티티 필드를 sql.Date로 변경함.
                         .benefitAmount(discount)
                         .useAmount(price)
-                        .is_fulfilled(card.getPerformance() <= price ? true : false)
+                        .isFulfilled(card.getPerformance() <= price ? true : false)
                         .build();
                 userCardHistoryRepository.save(uch);
             }
