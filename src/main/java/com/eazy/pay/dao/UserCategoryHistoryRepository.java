@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserCategoryHistoryRepository extends JpaRepository<UserCategoryHistory, Long> {
@@ -18,6 +19,21 @@ public interface UserCategoryHistoryRepository extends JpaRepository<UserCategor
 
     @Query("SELECT uch FROM UserCategoryHistory uch " +
             "WHERE uch.user.uid = :userId " +
-            "AND uch.yearAndMonth = :date")
+            "AND uch.yearAndMonth = :date " +
+            "AND uch.benefitAmount > 0 "
+    )
     List<UserCategoryHistory> findByUserIdAndDate(@Param("userId") Long userId, @Param("date") Date date);
+
+    @Query("SELECT uch FROM UserCategoryHistory uch WHERE uch.user.uid = :userId " +
+            "AND YEAR(uch.yearAndMonth) = YEAR(:date) " +
+            "AND MONTH(uch.yearAndMonth) = MONTH(:date) "+
+            "AND uch.category.uid = :categoryId "
+    )
+    Optional<UserCategoryHistory> findBenefitOfMonthByUserUidAndCategoryIdAndDate(@Param("userId") Long userId, @Param("categoryId") Long categoryId, @Param("date") Date date);
+
+    @Query("SELECT SUM(uch.benefitAmount) FROM UserCategoryHistory uch WHERE uch.user.uid = :userId " +
+            "AND YEAR(uch.yearAndMonth) = YEAR(:date) "+
+            "AND uch.benefitAmount > 0 "
+    )
+    Integer findBenefitOfYearByUserUidAndDate(@Param("userId") Long userId, @Param("date") Date date);
 }

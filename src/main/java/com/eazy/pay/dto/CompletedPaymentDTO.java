@@ -7,9 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class CompletedPaymentDTO {
-    private int originalAmount;
-    private int paidAmount;
-    private int discount;
+    private int price;
+    private int payback;
     private String cardName;
     private String cardImage;
 }

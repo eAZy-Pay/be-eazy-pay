@@ -2,7 +2,7 @@ package com.eazy.pay.service;
 
 import com.eazy.pay.dao.PaymentHistoryRepository;
 import com.eazy.pay.dao.UserCardRepository;
-import com.eazy.pay.dao.UserCatetgoryHistoryRepository;
+import com.eazy.pay.dao.UserCategoryHistoryRepository;
 import com.eazy.pay.dto.BenefitAndSimpleUserCardsDTO;
 import com.eazy.pay.dto.CardUsageSummaryDTO;
 import com.eazy.pay.dto.SimpleUserCardDTO;
@@ -40,7 +40,7 @@ class UserCardServiceTest {
     private PaymentHistoryRepository paymentHistoryRepository;
 
     @Mock
-    private UserCatetgoryHistoryRepository userCategoryHistoryRepository;
+    private UserCategoryHistoryRepository userCategoryHistoryRepository;
 
     @InjectMocks
     private UserCardService userCardService;
@@ -138,7 +138,7 @@ class UserCardServiceTest {
         .thenReturn(userCategoryHistory.getBenefitAmount());
 
         //이번 달
-        lenient().when(userCategoryHistoryRepository.findByUserUidAndDate(1L, new java.sql.Date(thisYearDate.getTime())))
+        lenient().when(userCategoryHistoryRepository.findByUserIdAndDate(1L, new java.sql.Date(thisYearDate.getTime())))
                 .thenReturn(List.of(userCategoryHistory2));
 
     }
