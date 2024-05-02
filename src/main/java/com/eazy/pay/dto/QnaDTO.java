@@ -12,7 +12,7 @@ public class QnaDTO {
     private String date;
     private String title;
     private String content;
-    private Boolean isAnswered;
+    private Boolean answered;
     private String answer;
     private Long userId;
     private String userName;
