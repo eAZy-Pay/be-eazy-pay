@@ -15,10 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,8 +40,14 @@ public class RecommendationService {
                         .useAmount(0)
                         .benefitAmount(0)
                         .build())
+                .sorted(Comparator.comparingInt(UserCategoryHistoryDTO::getUseAmount).reversed())
                 .limit(3)
                 .toList();
+
+        Map<Long, Integer> categoryOrder = new HashMap<>();
+        for (int i = 0; i < top3Categories.size(); i++) {
+            categoryOrder.put(top3Categories.get(i).getCategoryId(), i);
+        }
 
         List<CardWithBenefitDTO> recommendCategoryCard = cardBenefitRepository.findByCategoryUidIn(top3Categories.stream().map(UserCategoryHistoryDTO::getCategoryId).toList()).stream()
                 .sorted((a, b) -> b.getBenefitRate() - a.getBenefitRate())
@@ -52,6 +55,7 @@ public class RecommendationService {
                 .values().stream()
                 .flatMap(cardBenefitList -> cardBenefitList.stream().limit(1))
                 .sorted(Comparator.comparingInt(cardBenefit -> top3Categories.indexOf(cardBenefit.getCategory())))
+                .sorted(Comparator.comparingInt(cardBenefit -> categoryOrder.get(cardBenefit.getCategory().getUid())))
                 .map(CardBenefit::getCard)
                 .map(CardWithBenefitMapper.INSTANCE::toDTO)
                 .toList();
@@ -126,19 +130,24 @@ public class RecommendationService {
                 })
                 .toList();
 
+        Map<Long, Integer> categoryOrder = new HashMap<>();
+        for (int i = 0; i < top3Categories.size(); i++) {
+            categoryOrder.put(top3Categories.get(i).getCategoryId(), i);
+        }
 
          /**
           * 1. 카테고리별 상위 3개 카테고리 추천 카드
           * 2. 소유한 카드가 아닌 카드 중에서 카테고리별 benefitRate가 높은 카드 추천
           * 3. 카테고리별 하나씩 남김
           */
-        List<CardWithBenefitDTO> recommendCategoryCard = cardBenefitRepository.findByCategoryUidIn(top3Categories.stream().map(UserCategoryHistoryDTO::getCategoryId).toList()).stream()
-                .sorted((a, b) -> b.getBenefitRate() - a.getBenefitRate())
-                .filter(cardBenefit -> userCardHistoryList.stream().noneMatch(userCardHistory -> userCardHistory.getUserCard().getCard().equals(cardBenefit.getCard())))
+        List<CardWithBenefitDTO> recommendCategoryCard = cardBenefitRepository.findByCategoryUidIn(top3Categories.stream().map(UserCategoryHistoryDTO::getCategoryId).toList())
+                .stream()
+                .sorted((a, b) -> Integer.compare(b.getBenefitRate(), a.getBenefitRate()))
+                .filter(cardBenefit -> userCardHistoryList.stream().noneMatch(userCardHistory -> userCardHistory.getUserCard().getCard().equals(cardBenefit.getCard()))) // Filter out cards already owned
                 .collect(Collectors.groupingBy(CardBenefit::getCategory))
                 .values().stream()
                 .flatMap(cardBenefitList -> cardBenefitList.stream().limit(1))
-                .sorted(Comparator.comparingInt(cardBenefit -> top3Categories.indexOf(cardBenefit.getCategory())))
+                .sorted(Comparator.comparingInt(cardBenefit -> categoryOrder.get(cardBenefit.getCategory().getUid())))
                 .map(CardBenefit::getCard)
                 .map(CardWithBenefitMapper.INSTANCE::toDTO)
                 .toList();
