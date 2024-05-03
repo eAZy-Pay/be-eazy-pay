@@ -33,7 +33,6 @@ public class AuthController {
     public SignInDTO loginUser(@RequestBody Map<String, String> requestBody){
         String loginId = requestBody.get("user_name");
         String userPassword = requestBody.get("user_password");
-
         User user = userService.getUserByLoginId(loginId);
         if (user != null && passwordEncoder.matches(userPassword, user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
@@ -78,5 +77,4 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Password change failed: User not found\"}");
         }
     }
-
 }
