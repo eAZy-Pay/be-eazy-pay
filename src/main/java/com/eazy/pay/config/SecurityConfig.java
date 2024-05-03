@@ -24,7 +24,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("https://api.eazy-pay.online", "http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("https://www.eazy-pay.online", "http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("*"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
