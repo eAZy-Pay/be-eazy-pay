@@ -25,7 +25,8 @@ public class Question extends BaseEntity {
     private String content;
 
     @Column(name = "is_answered")
-    private boolean isAnswered;
+    private boolean answered;
 
     private String answer;
+
 }

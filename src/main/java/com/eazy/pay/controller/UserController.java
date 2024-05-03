@@ -220,4 +220,24 @@ public class UserController {
         return validUserCards;
     }
 
+    @GetMapping("/notification")
+    public ResponseEntity<Map<String, Object>> getNotification(@RequestParam("user_id") Long userId,
+                                                               @RequestParam(value = "active_read", required = false) Optional<Boolean> activeRead
+    ) {
+        Map<String, Object> responseMap = new HashMap<>();
+        try {
+            if (activeRead.isPresent()) {
+                responseMap.put("data", userService.getNotifications(userId, activeRead.get()));
+            } else {
+                responseMap.put("data", userService.getNotifications(userId));
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
+        } catch (DataAccessException dae) { // 데이터베이스 관련 예외 처리
+            responseMap.put("error", "데이터베이스 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMap);
+        } catch (Exception ex) { // 일반적인 예외 처리
+            responseMap.put("error", "서버 내부 오류가 발생했습니다. 나중에 다시 시도해주세요.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
+        }
+    }
 }

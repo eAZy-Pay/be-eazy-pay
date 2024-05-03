@@ -19,8 +19,7 @@ public interface UserCategoryHistoryRepository extends JpaRepository<UserCategor
 
     @Query("SELECT uch FROM UserCategoryHistory uch " +
             "WHERE uch.user.uid = :userId " +
-            "AND uch.yearAndMonth = :date " +
-            "AND uch.benefitAmount > 0 "
+            "AND uch.yearAndMonth = :date "
     )
     List<UserCategoryHistory> findByUserIdAndDate(@Param("userId") Long userId, @Param("date") Date date);
 

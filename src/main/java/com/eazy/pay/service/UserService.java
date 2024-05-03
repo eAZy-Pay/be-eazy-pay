@@ -1,7 +1,10 @@
 package com.eazy.pay.service;
 
+import com.eazy.pay.dao.NotificationRepository;
 import com.eazy.pay.dao.UserRepository;
+import com.eazy.pay.dto.NotificationDTO;
 import com.eazy.pay.dto.SignInDTO;
+import com.eazy.pay.mapper.NotificationMapper;
 import com.eazy.pay.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -57,4 +63,15 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    public List<NotificationDTO> getNotifications(Long userId, boolean activeRead) {
+        return notificationRepository.findByUserUidAndActiveRead(userId, activeRead).stream()
+                .map(NotificationMapper.INSTANCE::toDTO)
+                .toList();
+    }
+
+    public List<NotificationDTO> getNotifications(Long userId) {
+        return notificationRepository.findByUserUid(userId).stream()
+                .map(NotificationMapper.INSTANCE::toDTO)
+                .toList();
+    }
 }
