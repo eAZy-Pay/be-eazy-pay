@@ -10,6 +10,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -53,7 +56,7 @@ private User user2;
                 .title("질문1")
                 .content("내용1")
                 .date(new Date())
-                .isAnswered(false)
+                .answered(false)
                 .answer("아직 답변되지 않았어요.")
                 .user(user1)
                 .build();
@@ -65,13 +68,17 @@ private User user2;
                 .title("질문2")
                 .content("내용2")
                 .date(new Date())
-                .isAnswered(true)
+                .answered(true)
                 .answer("세상에서 가장 쉬운 페이 이지페이!")
                 .user(user2)
                 .build();
 
-        List<Question> questionList = List.of(question1, question2);
-        lenient().when(questionRepository.findAll()).thenReturn(questionList);
+        List<Question> questionList = Arrays.asList(question1, question2);
+
+        PageRequest pageable = PageRequest.of(0, 10);
+        Page<Question> questions = new PageImpl<>(questionList, pageable, questionList.size());
+
+        lenient().when(questionRepository.findAll(pageable)).thenReturn(questions);
         lenient().when(questionRepository.findById(1L)).thenReturn(Optional.of(question1));
         lenient().when(questionRepository.findById(2L)).thenReturn(Optional.of(question2));
         lenient().when(questionRepository.save(question1)).thenReturn(question1);
@@ -82,7 +89,7 @@ private User user2;
     @Test
     void testGetAllQnas() { // 모든 질문을 가져와 DTO 형태로 변환
         // when
-        List<QnaDTO> result = questionService.getAllQnas();
+        List<QnaDTO> result = questionService.getAllQna();
 
         // then
         assertEquals(2, result.size());
@@ -92,7 +99,7 @@ private User user2;
         assertEquals("내용1", qnaDTO1.getContent());
         assertEquals("User 1", qnaDTO1.getUserName());
         assertEquals("아직 답변되지 않았어요.", qnaDTO1.getAnswer());
-        assertEquals(false, qnaDTO1.getIsAnswered());
+        assertEquals(false, qnaDTO1.getAnswered());
         assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()), qnaDTO1.getDate());
         assertEquals(1L, qnaDTO1.getUserId());
 
@@ -103,7 +110,7 @@ private User user2;
         assertEquals("내용2", qnaDTO2.getContent());
         assertEquals("박선주", qnaDTO2.getUserName());
         assertEquals("세상에서 가장 쉬운 페이 이지페이!", qnaDTO2.getAnswer());
-        assertEquals(true, qnaDTO2.getIsAnswered());
+        assertEquals(true, qnaDTO2.getAnswered());
         assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()), qnaDTO2.getDate());
         assertEquals(2L, qnaDTO2.getUserId());
     }
@@ -119,7 +126,7 @@ private User user2;
                 .title("새질문1")
                 .content("새내용1")
                 .userName("User 1")
-                .isAnswered(true)
+                .answered(true)
                 .build();
 
         // when
@@ -133,11 +140,11 @@ private User user2;
 
         // 이미 수정된 질문 객체를 사용하여 검증
         assertEquals("이제 답변드렸어요.", dto.getAnswer());
-        assertEquals(true, dto.getIsAnswered());
+        assertEquals(true, dto.getAnswered());
         assertEquals("새질문1", dto.getTitle());
         assertEquals("새내용1", dto.getContent());
         assertEquals("이제 답변드렸어요.", dto.getAnswer());
-        assertEquals(true, dto.getIsAnswered());
+        assertEquals(true, dto.getAnswered());
 
 
     }
@@ -167,7 +174,7 @@ private User user2;
                 .date(new Date())
                 .title("질문1")
                 .content("내용1")
-                .isAnswered(false)
+                .answered(false)
                 .answer("아직 답변되지 않았어요.")
                 .user(User.builder().uid(1L).name("User 1").build())
                 .build();
@@ -184,7 +191,7 @@ private User user2;
         assertEquals("내용1", result.getContent());
         assertEquals("User 1", result.getUserName());
         assertEquals("아직 답변되지 않았어요.", result.getAnswer());
-        assertFalse(result.getIsAnswered());
+        assertFalse(result.getAnswered());
     }
 
 
@@ -198,7 +205,7 @@ private User user2;
                 .title("질문3")
                 .content("내용3")
                 .userName("User 1")
-                .isAnswered(false)
+                .answered(false)
                 .build();
 
         boolean result = questionService.createQna(qnaDTO3);
@@ -209,7 +216,7 @@ private User user2;
         assertEquals("내용3", qnaDTO3.getContent());
         assertEquals("User 1", qnaDTO3.getUserName());
         assertEquals("아직 답변되지 않았어요.", qnaDTO3.getAnswer());
-        assertEquals(false, qnaDTO3.getIsAnswered());
+        assertEquals(false, qnaDTO3.getAnswered());
         assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()), qnaDTO3.getDate());
         assertEquals(1L, qnaDTO3.getUserId());
         //assertEquals(3L, qnaDTO3.getUid()); //sql에서  AUTOINCREMENT로 설정되어 있어서 uid값이 자동으로 증가되어 저장됩니다.
