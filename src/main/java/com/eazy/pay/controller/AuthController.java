@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
@@ -28,17 +29,18 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/login")
-    public SignInDTO getuser(@RequestParam("user_name") String loginId, @RequestParam("user_password") String userPassword){
+    @PostMapping("/login")
+    public SignInDTO loginUser(@RequestBody Map<String, String> requestBody){
+        String loginId = requestBody.get("user_name");
+        String userPassword = requestBody.get("user_password");
+
         User user = userService.getUserByLoginId(loginId);
         if (user != null && passwordEncoder.matches(userPassword, user.getPassword())) {
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            // 개발자가 설정한 로그
             log.info("User logged in: " + user.getUid());
             return new SignInDTO(HttpStatus.OK, user.getUid(), user.getUsername(), user.getIsAdmin());
         } else {
-            // 개발자가 설정한 로그
             log.info("User login failed");
             return new SignInDTO(HttpStatus.UNAUTHORIZED);
         }
@@ -57,6 +59,23 @@ public class AuthController {
             }
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");  // HTTP 404 Not Found
+        }
+    }
+
+    @PatchMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody Map<String, String> requestBody) {
+        Long userId;
+        try {
+            userId = Long.parseLong(requestBody.get("user_uid"));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Password change failed: Server error");
+        }
+        String newPassword = requestBody.get("new_password");
+        boolean isChanged = userService.changeUserPassword(userId, newPassword);
+        if (isChanged) {
+            return ResponseEntity.ok("{\"message\": \"Password changed successfully\"}");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Password change failed: User not found\"}");
         }
     }
 
