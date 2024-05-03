@@ -50,6 +50,19 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);  // save 메소드가 등록된 사용자 객체를 반환
     }
 
+    public boolean changeUserPassword(Long userId, String newPassword) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        System.out.println("userOptional: " + userOptional);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
+            userRepository.save(user);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public List<NotificationDTO> getNotifications(Long userId, boolean activeRead) {
         return notificationRepository.findByUserUidAndActiveRead(userId, activeRead).stream()
                 .map(NotificationMapper.INSTANCE::toDTO)
