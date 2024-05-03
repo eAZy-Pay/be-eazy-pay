@@ -70,7 +70,7 @@ public class PayService {
 
             }
             //결제금액 계산
-            Integer paymentAmount = price - discount;
+
 
             // 카테고리 이름 가져오기
             String categoryName = "해당하는 카테고리가 없습니다.";
@@ -86,7 +86,7 @@ public class PayService {
             paymentHistoryRepository.save(PaymentHistory.builder()
                     .cardNum(payCard.getNum())
                     .paymentDate(new Date(System.currentTimeMillis()))
-                    .paymentAmount(paymentAmount)
+                    .paymentAmount(price)
                     .storeCode(storeCode)
                     .storeName(storeName)
                     .categoryName(categoryName)
@@ -97,7 +97,7 @@ public class PayService {
                 UserCardHistory tmh = thisMonthHistory.get();
                 tmh.setUseAmount(tmh.getUseAmount() + price);
                 tmh.setBenefitAmount(tmh.getBenefitAmount() + discount);
-                tmh.setIsFulfilled(card.getPerformance() <= tmh.getUseAmount() + paymentAmount ? true : false); //이번 결제로 실적 완성?
+                tmh.setIsFulfilled(card.getPerformance() <= tmh.getUseAmount() + price ? true : false); //이번 결제로 실적 완성?
                 userCardHistoryRepository.save(tmh);
 
 
@@ -190,9 +190,6 @@ public class PayService {
                 }
             }
 
-            //결제금액 계산
-            Integer paymentAmount = price - discount;
-
             // 카테고리 이름 가져오기
             String categoryName = "해당하는 카테고리가 없습니다.";
             Category category = categoryRepository.findById(categoryId).orElse(null);
@@ -207,7 +204,7 @@ public class PayService {
             paymentHistoryRepository.save(PaymentHistory.builder()
                     .cardNum(payCard.getNum())
                     .paymentDate(new Date(System.currentTimeMillis()))
-                    .paymentAmount(paymentAmount)
+                    .paymentAmount(price)
                     .storeCode(storeCode)
                     .storeName(storeName)
                     .categoryName(categoryName)
@@ -220,7 +217,7 @@ public class PayService {
                 UserCardHistory tmh = thisMonthHistory.get();
                 tmh.setUseAmount(tmh.getUseAmount() + price);
                 tmh.setBenefitAmount(tmh.getBenefitAmount() + discount);
-                tmh.setIsFulfilled(card.getPerformance() <= tmh.getUseAmount() + paymentAmount ? true : false); //이번 결제로 실적 완성?
+                tmh.setIsFulfilled(card.getPerformance() <= tmh.getUseAmount() + price ? true : false); //이번 결제로 실적 완성?
                 userCardHistoryRepository.save(tmh);
 
 
