@@ -42,7 +42,6 @@ public class QuestionService {
             Question existingQna = questionRepository.findById(qnaDTO.getUid())
                     .orElseThrow(() -> new IllegalArgumentException("해당하는 질문이 없습니다."));
 
-            System.out.println("existingQna: " + existingQna);
             // 답변이 이미 처리된 경우 충돌 처리
             if (existingQna.isAnswered() && qnaDTO.getAnswer() != null) {
                 throw new IllegalStateException("이미 답변된 질문입니다.");
@@ -67,8 +66,6 @@ public class QuestionService {
             if (qnaDTO.getContent() != null && !qnaDTO.getContent().isEmpty()) {
                 existingQna.setContent(qnaDTO.getContent());
             }
-
-            System.out.println("existingQna: " + existingQna);
 
             questionRepository.save(existingQna);
             return true;
