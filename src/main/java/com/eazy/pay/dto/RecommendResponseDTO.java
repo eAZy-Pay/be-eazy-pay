@@ -18,4 +18,6 @@ public class RecommendResponseDTO {
     List<CardWithBenefitAndUsageDTO> userTop3UseAmountCardList;
     // top3 카테고리 사용금액
     List<UserCategoryHistoryDTO> userTop3CategoryUseAmountList;
+    // 3개월 사용금액
+    int totalUseAmount;
 }

@@ -74,18 +74,22 @@ public class UserController {
             Date firstDayOfMonth = Date.valueOf(date.toLocalDate().withDayOfMonth(1));
             Date lastMonthDate = Date.valueOf(date.toLocalDate().minusMonths(1).withDayOfMonth(1));
 
-//            // 당월, 전월의 실적 채움
-//            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
-//                    .userCardId(userCard.getUid())
-//                    .yearAndMonth(firstDayOfMonth)
-//                    .isFulfilled(true)
-//                    .build());
-//
-//            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
-//                    .userCardId(userCard.getUid())
-//                    .yearAndMonth(lastMonthDate)
-//                    .isFulfilled(true)
-//                    .build());
+            // 당월, 전월의 실적 채움
+            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+                    .userCardId(userCard.getUid())
+                    .yearAndMonth(firstDayOfMonth)
+                    .benefitAmount(0)
+                    .useAmount(0)
+                    .isFulfilled(true)
+                    .build());
+
+            userCardHistoryService.saveUserCardHistory(UserCardHistoryDTO.builder()
+                    .userCardId(userCard.getUid())
+                    .yearAndMonth(lastMonthDate)
+                    .benefitAmount(0)
+                    .useAmount(0)
+                    .isFulfilled(true)
+                    .build());
 
             responseMap.put("message", "카드가 성공적으로 신청되었습니다.");
             return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
@@ -218,26 +222,5 @@ public class UserController {
 //         TODO: validUserCards를 결제 알고리즘에 따라 순위를 매겨 정렬한 결과 리스트를 리턴하기
 //         TODO: ValidUserCardDTO에 예상 혜택 필드 추가
         return validUserCards;
-    }
-
-    @GetMapping("/notification")
-    public ResponseEntity<Map<String, Object>> getNotification(@RequestParam("user_id") Long userId,
-                                                               @RequestParam(value = "active_read", required = false) Optional<Boolean> activeRead
-    ) {
-        Map<String, Object> responseMap = new HashMap<>();
-        try {
-            if (activeRead.isPresent()) {
-                responseMap.put("data", userService.getNotifications(userId, activeRead.get()));
-            } else {
-                responseMap.put("data", userService.getNotifications(userId));
-            }
-            return ResponseEntity.status(HttpStatus.OK).body(responseMap);
-        } catch (DataAccessException dae) { // 데이터베이스 관련 예외 처리
-            responseMap.put("error", "데이터베이스 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMap);
-        } catch (Exception ex) { // 일반적인 예외 처리
-            responseMap.put("error", "서버 내부 오류가 발생했습니다. 나중에 다시 시도해주세요.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
-        }
     }
 }

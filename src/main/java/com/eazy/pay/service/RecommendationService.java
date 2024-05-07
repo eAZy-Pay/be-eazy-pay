@@ -1,9 +1,6 @@
 package com.eazy.pay.service;
 
-import com.eazy.pay.dao.CardBenefitRepository;
-import com.eazy.pay.dao.CategoryRepository;
-import com.eazy.pay.dao.UserCardHistoryRepository;
-import com.eazy.pay.dao.UserCategoryHistoryRepository;
+import com.eazy.pay.dao.*;
 import com.eazy.pay.dto.CardWithBenefitAndUsageDTO;
 import com.eazy.pay.dto.CardWithBenefitDTO;
 import com.eazy.pay.dto.RecommendResponseDTO;
@@ -31,6 +28,9 @@ public class RecommendationService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private UserCardRepository userCardRepository;
 
     private RecommendResponseDTO notEnoughData() {
         List<UserCategoryHistoryDTO> top3Categories = categoryRepository.findAll().stream()
@@ -65,6 +65,7 @@ public class RecommendationService {
                 .userTop3CategoryCardList(new ArrayList<>())
                 .userTop3UseAmountCardList(new ArrayList<>())
                 .userTop3CategoryUseAmountList(top3Categories)
+                .totalUseAmount(0)
                 .build();
     }
 
@@ -77,6 +78,10 @@ public class RecommendationService {
 
         Date now = Date.valueOf(LocalDate.now().withDayOfMonth(1)); // 현재 월의 첫째 날
         Date threeMonthsAgo = Date.valueOf(now.toLocalDate().minusMonths(3)); // 3개월 전
+
+        List<Card> userCards = userCardRepository.findByUserUid(userId).stream()
+                .map(UserCard::getCard)
+                .toList();
 
         // [0] : 사용 금액, [1] : 혜택 금액
 
@@ -143,7 +148,7 @@ public class RecommendationService {
         List<CardWithBenefitDTO> recommendCategoryCard = cardBenefitRepository.findByCategoryUidIn(top3Categories.stream().map(UserCategoryHistoryDTO::getCategoryId).toList())
                 .stream()
                 .sorted((a, b) -> Integer.compare(b.getBenefitRate(), a.getBenefitRate()))
-                .filter(cardBenefit -> userCardHistoryList.stream().noneMatch(userCardHistory -> userCardHistory.getUserCard().getCard().equals(cardBenefit.getCard()))) // Filter out cards already owned
+                .filter(cardBenefit -> userCards.stream().noneMatch(card -> card.getUid().equals(cardBenefit.getCard().getUid())))
                 .collect(Collectors.groupingBy(CardBenefit::getCategory))
                 .values().stream()
                 .flatMap(cardBenefitList -> cardBenefitList.stream().limit(1))
@@ -197,6 +202,7 @@ public class RecommendationService {
                 .userTop3CategoryCardList(top3CategoryCard)
                 .userTop3UseAmountCardList(top3UsedCard)
                 .userTop3CategoryUseAmountList(top3Categories)
+                .totalUseAmount(userCardHistoryList.stream().mapToInt(UserCardHistory::getUseAmount).sum())
                 .build();
     }
 }
