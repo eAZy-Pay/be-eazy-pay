@@ -41,6 +41,15 @@ public class RegisterController {
             return ResponseEntity.status(409).body("id already exists");
         }
     }
+
+    @GetMapping(value = "/check-phone-number")
+    public ResponseEntity checkPhoneNumber(@RequestParam("phoneNumber") String phoneNumber) {
+        if (userService.getUserByPhoneNumber(phoneNumber) == null) {
+            return ResponseEntity.ok("phone number available");
+        } else {
+            return ResponseEntity.status(409).body("phone number already exists");
+        }
+    }
 }
 
 
