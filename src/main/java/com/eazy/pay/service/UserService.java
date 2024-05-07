@@ -1,13 +1,10 @@
 package com.eazy.pay.service;
 
-import com.eazy.pay.dao.NotificationRepository;
 import com.eazy.pay.dao.UserRepository;
 import com.eazy.pay.dto.NotificationDTO;
-import com.eazy.pay.dto.SignInDTO;
 import com.eazy.pay.mapper.NotificationMapper;
 import com.eazy.pay.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -45,6 +42,11 @@ public class UserService implements UserDetailsService {
                 .orElse(null);
     }
 
+    public User getUserByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .orElse(null);
+    }
+
     public User registerUser(User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         return userRepository.save(user);  // save 메소드가 등록된 사용자 객체를 반환
@@ -52,7 +54,6 @@ public class UserService implements UserDetailsService {
 
     public boolean changeUserPassword(Long userId, String newPassword) {
         Optional<User> userOptional = userRepository.findById(userId);
-        System.out.println("userOptional: " + userOptional);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
@@ -86,4 +87,5 @@ public class UserService implements UserDetailsService {
                 .map(NotificationMapper.INSTANCE::toDTO)
                 .toList();
     }
+
 }
