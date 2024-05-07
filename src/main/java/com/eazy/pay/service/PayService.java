@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -22,6 +23,8 @@ public class PayService {
     CategoryRepository categoryRepository;
     @Autowired
     UserCategoryHistoryRepository userCategoryHistoryRepository;
+    @Autowired
+    NotificationRepository notificationRepository;
 
     // 사용자가 선택한 카드의 UID로 결제
     public Object userPay(PayUserRequestDTO requestDTO){
@@ -116,6 +119,16 @@ public class PayService {
                             .build());
                 }
             }
+
+            Notification notification = Notification.builder()
+                    .user(payCard.getUser())
+                    .message("결제가 완료되었습니다. 결제금액: " + String.format("%,d", price) + "원, 페이백금액: " + String.format("%,d", payback) + "원")
+                    .createdAt(LocalDateTime.now())
+                    .activeRead(false)
+                    .build();
+
+            notificationRepository.save(notification);
+
 
             // 결제 완료 정보 응답
             return CompletedPaymentDTO.builder()
@@ -236,15 +249,15 @@ public class PayService {
     }
 
 
-        /*  예외 처리
-        *    (jpa 쿼리로 구현할 수 있지만 service 단에서 처리할 경우,
-        *    메서드를 수정해 클라이언트에게 각 카드별 결제 실패 원인을 제공해 수 있음)
-        *
-        *    1. 정지된 카드 (만료 카드)
-        *    2. 한도 초과 카드
-        *
-        *    유저 카드와, 결제 가능 또는 결제 불가 사유 Map반환
-        */
+    /*  예외 처리
+     *    (jpa 쿼리로 구현할 수 있지만 service 단에서 처리할 경우,
+     *    메서드를 수정해 클라이언트에게 각 카드별 결제 실패 원인을 제공해 수 있음)
+     *
+     *    1. 정지된 카드 (만료 카드)
+     *    2. 한도 초과 카드
+     *
+     *    유저 카드와, 결제 가능 또는 결제 불가 사유 Map반환
+     */
 
     private Map<UserCard, String> checkavailableCards(List<UserCard> userCards, Integer price){
 
@@ -282,8 +295,7 @@ public class PayService {
         return java.sql.Date.valueOf(LocalDate.now().minusMonths(1).withDayOfMonth(1));
 
     }
-
-
+    
     //페이백 금액 계산
     private int calulatePaybackByUserCardAndCategoryIdAndPrice(UserCard userCard, Long categoryId, int price){
         int payback = 0;
@@ -321,6 +333,3 @@ public class PayService {
         return  payback;
     }
 }
-
-
-
