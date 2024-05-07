@@ -76,17 +76,5 @@ public class UserService implements UserDetailsService {
             return false;
         }
     }
-
-    public List<NotificationDTO> getNotifications(Long userId, boolean activeRead) {
-        return notificationRepository.findByUserUidAndActiveRead(userId, activeRead).stream()
-                .map(NotificationMapper.INSTANCE::toDTO)
-                .toList();
-    }
-
-    public List<NotificationDTO> getNotifications(Long userId) {
-        return notificationRepository.findByUid(userId).stream()
-                .map(NotificationMapper.INSTANCE::toDTO)
-                .toList();
-    }
-
+    
 }
