@@ -89,7 +89,7 @@ private User user2;
     @Test
     void testGetAllQnas() { // 모든 질문을 가져와 DTO 형태로 변환
         // when
-        List<QnaDTO> result = questionService.getAllQna();
+        List<QnaDTO> result = questionService.getAllQna(PageRequest.of(0, 100)).getContent();
 
         // then
         assertEquals(2, result.size());
