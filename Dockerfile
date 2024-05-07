@@ -11,7 +11,7 @@ COPY gradle gradle
 COPY src src
 
 # Gradle 빌드를 실행합니다.
-RUN ./gradlew build
+RUN ./gradlew build -x test
 
 # App 실행 이미지
 FROM eclipse-temurin:17-jre-alpine

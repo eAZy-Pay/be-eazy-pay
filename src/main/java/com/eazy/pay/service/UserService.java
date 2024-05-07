@@ -59,6 +59,18 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    public boolean changePinPassword(Long userId, String newPin) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setPin(newPin);
+            userRepository.save(user);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public List<NotificationDTO> getNotifications(Long userId, boolean activeRead) {
         return notificationRepository.findByUserUidAndActiveRead(userId, activeRead).stream()
                 .map(NotificationMapper.INSTANCE::toDTO)

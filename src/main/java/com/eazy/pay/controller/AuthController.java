@@ -77,4 +77,21 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Password change failed: User not found\"}");
         }
     }
+
+    @PatchMapping("/change-pin")
+    public ResponseEntity<?> changePinPassword(@RequestBody Map<String, String> requestBody) {
+        Long userId;
+        try {
+            userId = Long.parseLong(requestBody.get("uid"));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Pin change failed: Server error");
+        }
+        String newPin = requestBody.get("pin");
+        boolean isChanged = userService.changePinPassword(userId, newPin);
+        if (isChanged) {
+            return ResponseEntity.ok("{\"message\": \"Pin changed successfully\"}");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\": \"Pin change failed: User not found\"}");
+        }
+    }
 }
