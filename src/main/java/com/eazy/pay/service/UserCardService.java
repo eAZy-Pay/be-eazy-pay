@@ -255,13 +255,14 @@ public class UserCardService {
                 .anyMatch(userCard -> userCard.getCard().getUid().equals(cardId) && userCard.isCardValid());
     }
 
-    public CardUsageSummaryDTO getCardUsageSummary(Long userId) { // 카테고리 내용이 아닌 연회비는 dashBoard로 뺄 것
+    public CardUsageSummaryDTO getCardUsageSummary(Long userId) { // 이번 달 카테고리별 혜택 3개까지, 나머지 기타 && 총 연회비, 올해 혜택누적금액
         Date date = new java.sql.Date(System.currentTimeMillis());
         date = Date.valueOf(date.toLocalDate().withDayOfMonth(1));
 
         List<UserCard> userCardList = userCardRepository.findByUserUid(userId);
         // 올해의 혜택 누적금액
-        int benefitOfYear = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+        Optional<Integer> benefitOfYearFromDB = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
+        int benefitOfYear = benefitOfYearFromDB.orElse(0);
         List<CategoryBenefitAmountDTO> categoryBenefitAmountDTOList = new ArrayList<>();
         if(!userCardList.isEmpty()) { //보유카드 존재
             //연회비 구하기, 유효한 카드만 필터링
@@ -275,8 +276,6 @@ public class UserCardService {
                     .filter(userCategoryHistory -> userCategoryHistory.getBenefitAmount() > 0)
                     .collect(Collectors.toList());
 
-            System.out.println("userCategoryHistoryList: " + userCategoryHistoryList);
-
             if (!userCategoryHistoryList.isEmpty()) {
                 // 각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
                 int benefitOfMonth = 0;
@@ -288,18 +287,12 @@ public class UserCardService {
                             .benefitAmount(benefitAmount)
                             .build());
                 }
-                System.out.println("categoryBenefitAmountDTOList: " + categoryBenefitAmountDTOList);
 
-            // 올해의 혜택 누적금액
-                Integer benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
-                System.out.println("benefitOfYearData: " + benefitOfYearData);
                 //각 카테고리별 혜택 금액을 내림차순으로 정렬하고 3개까지만 DTO에 담아서 리턴
                 List<CategoryBenefitAmountDTO> top3List = categoryBenefitAmountDTOList.stream()
                         .sorted(Comparator.comparing(CategoryBenefitAmountDTO::getBenefitAmount).reversed())
                         .limit(3)
                         .collect(Collectors.toList());
-
-                System.out.println("top3List: " + top3List);
 
                 //top3List에 포함되지 않는 나머지 카테고리명에 대한 월별 사용 금액을 합친 값 추가
                 int otherCategoryAmount = categoryBenefitAmountDTOList.stream()
@@ -312,8 +305,6 @@ public class UserCardService {
                         .categoryName("기타")
                         .benefitAmount(otherCategoryAmount)
                         .build());
-
-                System.out.println("top3List: " + top3List);
 
                 //이번 달 혜택과 연회비, 올해의 혜택 누적금액 리턴
                 return CardUsageSummaryDTO.builder()
