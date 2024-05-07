@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service
 public class NotificationService {
@@ -19,65 +17,65 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    private final Map<Long, ConcurrentLinkedQueue<SseEmitter>> userEmitters = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, SseEmitter> userEmitters = new ConcurrentHashMap<>();
+
 
     public void addEmitter(Long userId, SseEmitter emitter) {
-        ConcurrentLinkedQueue<SseEmitter> emitters = userEmitters.computeIfAbsent(userId, k -> new ConcurrentLinkedQueue<>());
-        if (!emitters.isEmpty()) {
-            emitters.forEach(SseEmitter::complete);
-            emitters.clear(); // Connection pool 차지하지 않도록 비워줌
+        SseEmitter previousEmitter = userEmitters.put(userId, emitter);
+        if (previousEmitter != null) {
+            previousEmitter.complete();
         }
-        emitters.add(emitter);
-        emitter.onCompletion(() -> removeEmitter(userId, emitter));
-        emitter.onTimeout(() -> removeEmitter(userId, emitter));
-        emitter.onError(e -> handleEmitterError(userId, emitter, e));
+        emitter.onCompletion(() -> removeEmitter(userId));
+        emitter.onTimeout(() -> removeEmitter(userId));
+        emitter.onError(e -> handleEmitterError(userId, e));
 
         sendInitialNotification(userId, emitter);
     }
 
-    private void handleEmitterError(Long userId, SseEmitter emitter, Throwable e) {
-        removeEmitter(userId, emitter);
-        emitter.completeWithError(e);
+    private void handleEmitterError(Long userId, Throwable e) {
+        removeEmitter(userId);
+        SseEmitter emitter = userEmitters.get(userId);
+        if (emitter != null) {
+            emitter.completeWithError(e);
+        }
     }
 
-    private void removeEmitter(Long userId, SseEmitter emitter) {
-        ConcurrentLinkedQueue<SseEmitter> emitters = userEmitters.get(userId);
-        if (emitters != null) {
-            emitters.remove(emitter);
-            if (emitters.isEmpty()) {
-                userEmitters.remove(userId);
-            }
+    private void removeEmitter(Long userId) {
+        SseEmitter emitter = userEmitters.remove(userId);
+        if (emitter != null) {
+            emitter.complete();
         }
     }
 
     public void sendInitialNotification(Long userId, SseEmitter emitter) {
-        List<NotificationDTO> notifications = notificationRepository.findByUserUidAndActiveRead(userId, false).stream()
-                .map(NotificationMapper.INSTANCE::toDTO)
-                .toList();
+        List<NotificationDTO> notifications = fetchNotifications(userId);
         if (!notifications.isEmpty()) {
             try {
-                emitter.send(notifications);
+                emitter.send(SseEmitter.event().name("initial").data(notifications));
             } catch (Exception e) {
-                handleEmitterError(userId, emitter, e);
+                handleEmitterError(userId, e);
             }
         }
     }
 
+    private List<NotificationDTO> fetchNotifications(Long userId) {
+        return notificationRepository.findByUserUidAndActiveRead(userId, false).stream()
+                .map(NotificationMapper.INSTANCE::toDTO)
+                .toList();
+    }
+
     @Scheduled(fixedRateString = "${notification.rate:10000}")
     public void sendEvents() {
-        userEmitters.forEach((userId, emitters) -> {
-            System.out.println("Sending notifications to user " + userId);
-            List<NotificationDTO> notifications = notificationRepository.findByUserUidAndActiveRead(userId, false).stream()
-                    .map(NotificationMapper.INSTANCE::toDTO)
-                    .toList();
-            if (!notifications.isEmpty()) {
-                emitters.forEach(emitter -> {
+        userEmitters.forEach((userId, emitter) -> {
+            if (emitter != null) {
+                List<NotificationDTO> notifications = fetchNotifications(userId);
+                if (!notifications.isEmpty()) {
                     try {
-                        emitter.send(notifications);
+                        emitter.send(SseEmitter.event().name("update").data(notifications));
                     } catch (Exception e) {
-                        handleEmitterError(userId, emitter, e);
+                        handleEmitterError(userId, e);
                     }
-                });
+                }
             }
         });
     }
