@@ -135,7 +135,7 @@ class UserCardServiceTest {
 
         // 올해
         lenient().when(userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(1L,new java.sql.Date(thisYearDate.getTime())))
-        .thenReturn(userCategoryHistory.getBenefitAmount());
+        .thenReturn(Optional.ofNullable(userCategoryHistory.getBenefitAmount()));
 
         //이번 달
         lenient().when(userCategoryHistoryRepository.findByUserIdAndDate(1L, new java.sql.Date(thisYearDate.getTime())))

@@ -1,5 +1,6 @@
 package com.eazy.pay.service;
 
+import com.eazy.pay.dao.NotificationRepository;
 import com.eazy.pay.dao.UserRepository;
 import com.eazy.pay.dto.NotificationDTO;
 import com.eazy.pay.mapper.NotificationMapper;
@@ -75,17 +76,5 @@ public class UserService implements UserDetailsService {
             return false;
         }
     }
-
-    public List<NotificationDTO> getNotifications(Long userId, boolean activeRead) {
-        return notificationRepository.findByUserUidAndActiveRead(userId, activeRead).stream()
-                .map(NotificationMapper.INSTANCE::toDTO)
-                .toList();
-    }
-
-    public List<NotificationDTO> getNotifications(Long userId) {
-        return notificationRepository.findByUserUid(userId).stream()
-                .map(NotificationMapper.INSTANCE::toDTO)
-                .toList();
-    }
-
+    
 }
