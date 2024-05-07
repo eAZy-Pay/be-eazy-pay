@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,9 @@ public class UserCardService {
 
     @Autowired
     private UserCategoryHistoryRepository userCategoryHistoryRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     public void deleteUserCard(Long userCardId) {
         userCardRepository.deleteById(userCardId);
@@ -204,7 +208,23 @@ public class UserCardService {
         userCardDTO.setCardValid(true);
         userCardDTO.setLinkEazy(true);
 
+        Card card = cardRepository.findByUid(userCardDTO.getCardId())
+                .orElseThrow(() -> new RuntimeException("Card not found"));
+
         UserCard userCard = UserCardMapper.INSTANCE.toEntity(userCardDTO);
+        userCard.setCard(card);
+
+
+        // 카드 신청 완료 시 알림 생성
+        Notification notification = Notification.builder()
+                .user(userCard.getUser())
+                .message(userCard.getCard().getName() + " 카드가 신청되었습니다.")
+                .createdAt(LocalDateTime.now())
+                .activeRead(false)
+                .build();
+
+        notificationRepository.save(notification);
+
         return userCardRepository.save(userCard); // 저장
     }
 
@@ -275,8 +295,6 @@ public class UserCardService {
                     .filter(userCategoryHistory -> userCategoryHistory.getBenefitAmount() > 0)
                     .collect(Collectors.toList());
 
-            System.out.println("userCategoryHistoryList: " + userCategoryHistoryList);
-
             if (!userCategoryHistoryList.isEmpty()) {
                 // 각 카테고리별 혜택 금액 구하기 & 이번달 혜택 금액 누적
                 int benefitOfMonth = 0;
@@ -288,18 +306,16 @@ public class UserCardService {
                             .benefitAmount(benefitAmount)
                             .build());
                 }
-                System.out.println("categoryBenefitAmountDTOList: " + categoryBenefitAmountDTOList);
 
             // 올해의 혜택 누적금액
                 Integer benefitOfYearData = userCategoryHistoryRepository.findBenefitOfYearByUserUidAndDate(userId, date);
-                System.out.println("benefitOfYearData: " + benefitOfYearData);
+
                 //각 카테고리별 혜택 금액을 내림차순으로 정렬하고 3개까지만 DTO에 담아서 리턴
                 List<CategoryBenefitAmountDTO> top3List = categoryBenefitAmountDTOList.stream()
                         .sorted(Comparator.comparing(CategoryBenefitAmountDTO::getBenefitAmount).reversed())
                         .limit(3)
                         .collect(Collectors.toList());
 
-                System.out.println("top3List: " + top3List);
 
                 //top3List에 포함되지 않는 나머지 카테고리명에 대한 월별 사용 금액을 합친 값 추가
                 int otherCategoryAmount = categoryBenefitAmountDTOList.stream()
@@ -313,7 +329,6 @@ public class UserCardService {
                         .benefitAmount(otherCategoryAmount)
                         .build());
 
-                System.out.println("top3List: " + top3List);
 
                 //이번 달 혜택과 연회비, 올해의 혜택 누적금액 리턴
                 return CardUsageSummaryDTO.builder()
